@@ -11,10 +11,10 @@
 #
 # Happy Coding!
 
-service: gitwizelambda
+service: gitwize-lambda
 # app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+#app: gitwize
+#org: wizeline 
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -26,24 +26,15 @@ provider:
   runtime: go1.x
 
 # you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  stage: dev
+  region: ap-southeast-1
 
 # you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "rds:*"
+      Resource: "*"   
 
 # you can define service wide environment variables here
 #  environment:
