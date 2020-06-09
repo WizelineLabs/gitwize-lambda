@@ -79,7 +79,7 @@ functions:
       - http:
           path: update_all_repos
           method: get
-      - schedule: "rate(12 hours)"
+      - schedule: "cron(0 */8 * * *)"
   update_single:
     handler: bin/update_single
     memorySize: 1024
@@ -103,3 +103,4 @@ functions:
       - http:
           path: load_metric
           method: get
+      - schedule: "cron(20 */8 * * *)"
