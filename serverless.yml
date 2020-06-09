@@ -50,6 +50,7 @@ package:
     - ./**
   include:
     - ./bin/**
+    - ./db/update_metric_table.sql
 
 functions:
   update_one_repo:
@@ -79,3 +80,26 @@ functions:
           path: update_all_repos
           method: get
       - schedule: "rate(12 hours)"
+  update_single:
+    handler: bin/update_single
+    memorySize: 1024
+    timeout: 900
+    environment:
+      DB_CONN_STRING: ${env:DB_CONN_STRING}
+      USE_DEFAULT_API_TOKEN: "TRUE"
+      DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
+      CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
+    events:
+      - http:
+          path: update_single
+          method: get
+  load_metrics:
+    handler: bin/load_metrics
+    memorySize: 1024
+    timeout: 900
+    environment:
+      DB_CONN_STRING: ${env:DB_CONN_STRING}
+    events:
+      - http:
+          path: load_metric
+          method: get

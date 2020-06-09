@@ -19,6 +19,7 @@ func GetRepo(repoName, repoURL, token string) *git.Repository {
 	os.RemoveAll(repoPath)
 	r, err := git.PlainClone(repoPath, false, &git.CloneOptions{
 		Auth: &http.BasicAuth{
+			Username: "nonempty",
 			Password: token,
 		},
 		URL:               repoURL,
@@ -29,6 +30,7 @@ func GetRepo(repoName, repoURL, token string) *git.Repository {
 	if err != nil {
 		log.Panic(err)
 	}
+
 	return r
 }
 
