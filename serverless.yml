@@ -14,7 +14,7 @@
 service: gitwize-lambda
 # app and org for use with dashboard.serverless.com
 #app: gitwize
-#org: wizeline 
+#org: wizeline
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -29,12 +29,17 @@ provider:
   stage: dev
   region: ap-southeast-1
 
+
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "rds:*"
-      Resource: "*"   
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "lambda:InvokeFunction"
+      Resource: "*"
 
 # you can define service wide environment variables here
 #  environment:
@@ -45,69 +50,57 @@ package:
     - ./**
   include:
     - ./bin/**
+    - ./db/update_metric_table.sql
 
 functions:
-  hello:
-    handler: bin/hello
+  update_one_repo:
+    handler: bin/update_one_repo
+    memorySize: 1024
+    timeout: 900
+    environment:
+      DB_CONN_STRING: ${env:DB_CONN_STRING}
+      USE_DEFAULT_API_TOKEN: "TRUE"
+      DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
+      CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
     events:
       - http:
-          path: hello
+          path: update_one_repo
           method: get
-  world:
-    handler: bin/world
+  update_all_repos:
+    handler: bin/update_all_repos
+    memorySize: 1024
+    timeout: 900
+    environment:
+      DB_CONN_STRING: ${env:DB_CONN_STRING}
+      USE_DEFAULT_API_TOKEN: "TRUE"
+      DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
+      CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
     events:
       - http:
-          path: world
+          path: update_all_repos
           method: get
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-# events:
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - websocket: $connect
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
-#      - alb:
-#          listenerArn: arn:aws:elasticloadbalancing:us-east-1:XXXXXX:listener/app/my-load-balancer/50dc6c495c0c9188/
-#          priority: 1
-#          conditions:
-#            host: example.com
-#            path: /hello
-
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+      - schedule: "cron(0 0/8 * * ? *)"
+  update_single:
+    handler: bin/update_single
+    memorySize: 1024
+    timeout: 900
+    environment:
+      DB_CONN_STRING: ${env:DB_CONN_STRING}
+      USE_DEFAULT_API_TOKEN: "TRUE"
+      DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
+      CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
+    events:
+      - http:
+          path: update_single
+          method: get
+  load_metrics:
+    handler: bin/load_metrics
+    memorySize: 1024
+    timeout: 900
+    environment:
+      DB_CONN_STRING: ${env:DB_CONN_STRING}
+    events:
+      - http:
+          path: load_metric
+          method: get
+      - schedule: "cron(20 0/8 * * ? *)"
