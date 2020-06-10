@@ -10,7 +10,7 @@ import (
 // TimeTrack use with defer to track processing time of a function
 func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
-	log.Printf("\n%s took %s", name, elapsed)
+	log.Printf("%s took %s", name, elapsed)
 }
 
 // GetAccessToken retrieve access token from db or environ
