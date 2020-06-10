@@ -15,27 +15,42 @@ func UpdateDataForRepo(repoID int, repoURL, repoName, token, branch string, date
 	var r *git.Repository
 	r = GetRepo(repoName, repoURL, token)
 	commitIter := GetCommitIterFromBranch(r, branch, dateRange)
-	updateCommitData(commitIter, repoID, conn)
+	updateCommitAndFileStatData(commitIter, repoID, conn)
 }
 
-func updateCommitData(commitIter object.CommitIter, repoID int, conn *sql.DB) {
-	defer utils.TimeTrack(time.Now(), "updateCommitData")
-	dtos := []commitDto{}
+func updateCommitAndFileStatData(commitIter object.CommitIter, repoID int, conn *sql.DB) {
+	defer utils.TimeTrack(time.Now(), "updateCommitAndFileStatData")
+	cdtos := CommitDtos{}
+	fdtos := FileStatDtos{}
+
 	err := commitIter.ForEach(func(c *object.Commit) error {
-		if len(dtos) == batchSize {
-			executeBulkStatement(dtos, conn)
-			dtos = []commitDto{}
+		if len(cdtos.dtos) >= batchSize {
+			executeBulkStatement(cdtos, conn)
+			cdtos = CommitDtos{}
 		} else {
 			dto := getCommitDTO(c)
 			dto.RepositoryID = repoID
-			dtos = append(dtos, dto)
+			cdtos.append(dto)
 		}
+
+		if len(fdtos.dtos) >= batchSize {
+			executeBulkStatement(fdtos, conn)
+			fdtos = FileStatDtos{}
+		} else {
+			newFileDtos := getFileStatDTO(c, repoID)
+			fdtos.append(newFileDtos)
+		}
+
 		return nil
 	})
 	if err != nil {
 		log.Panicln(err.Error())
 	}
-	if len(dtos) > 0 {
-		executeBulkStatement(dtos, conn)
+
+	if len(cdtos.dtos) > 0 {
+		executeBulkStatement(cdtos, conn)
+	}
+	if len(fdtos.dtos) > 0 {
+		executeBulkStatement(fdtos, conn)
 	}
 }

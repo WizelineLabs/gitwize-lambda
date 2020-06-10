@@ -2,18 +2,19 @@ package gogit
 
 import (
 	"database/sql"
-	"github.com/GitWize/gitwize-lambda/utils"
 	"log"
 	"strings"
-	"time"
 )
 
-func generateBulkCommitStatement(dtos []commitDto) (statement string, valArgs []interface{}) {
-	defer utils.TimeTrack(time.Now(), "generateBulkCommitStatement")
+type dtosInterface interface {
+	generateSQLStatement() (string, []interface{})
+}
 
-	statement = "INSERT INTO " + commitTable + " (repository_id, hash, author_email, message, num_files, addition_loc, deletion_loc, num_parents, total_loc, year, month, day, hour, commit_time_stamp) "
+func (this CommitDtos) generateSQLStatement() (string, []interface{}) {
+	dtos := this.dtos
+	statement := "INSERT INTO " + commitTable + " (repository_id, hash, author_email, message, num_files, addition_loc, deletion_loc, num_parents, total_loc, year, month, day, hour, commit_time_stamp) "
 	values := make([]string, len(dtos))
-	valArgs = []interface{}{}
+	valArgs := []interface{}{}
 	for i, dto := range dtos {
 		values[i] = "(" + strings.Repeat("?, ", 13) + "?)"
 		args := dto.getListValues()
@@ -23,10 +24,22 @@ func generateBulkCommitStatement(dtos []commitDto) (statement string, valArgs []
 	return statement, valArgs
 }
 
-func executeBulkStatement(dtos []commitDto, conn *sql.DB) {
-	defer utils.TimeTrack(time.Now(), "executeBulkStatement")
+func (this FileStatDtos) generateSQLStatement() (string, []interface{}) {
+	dtos := this.dtos
+	statement := "INSERT INTO " + fileStatTable + " (repository_id, hash, author_email, file_name, addition_loc, deletion_loc, year, month, day, hour, commit_time_stamp) "
+	values := make([]string, len(dtos))
+	valArgs := []interface{}{}
+	for i, dto := range dtos {
+		values[i] = "(" + strings.Repeat("?, ", 10) + "?)"
+		args := dto.getListValues()
+		valArgs = append(valArgs, args...)
+	}
+	statement = statement + "VALUES" + strings.Join(values, ",") + " ON DUPLICATE KEY UPDATE repository_id=repository_id"
+	return statement, valArgs
+}
 
-	statement, valArgs := generateBulkCommitStatement(dtos)
+func executeBulkStatement(i dtosInterface, conn *sql.DB) {
+	statement, valArgs := i.generateSQLStatement()
 	result, err := conn.Exec(statement, valArgs...)
 	if err != nil {
 		log.Panicln(err.Error())
