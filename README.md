@@ -18,16 +18,16 @@ lambda functions to retrieve and process data for gitwize (commit data, PR data,
 **Note that you can point DB_CONN_STRING to local/dev/prod directly, so be caution.**
 
 #### Function to get commit & PR data for All repositories:
-`go run local/get_data_all_repos.go`
+`go run local/get_data_all_repos/main.go`
 
 #### Function to load metrics for All repositories:
-`go run local/load_metric_all_repos.go`
+`go run local/load_metric_all_repos/main.go`
 
 #### Function to get commit & PR data for single repo
-`go run local/single_repos.go [repo_id] [repo_name] [repo_url] [repo_pass]`
+`go run local/get_data_single_repo/main.go [repo_id] [repo_name] [repo_url] [repo_pass]`
 
 for example:
-`go run local/get_data_single_repo.go 61 go-git https://github.com/go-git/go-git`
+`go run local/get_data_single_repo/main.go 61 go-git https://github.com/go-git/go-git.git`
 
 ## Build and deploy to cloud
 - install serverless framework
