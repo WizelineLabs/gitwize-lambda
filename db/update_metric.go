@@ -30,7 +30,10 @@ func UpdateMetricTable() {
 		log.Println(request)
 		result, err := conn.Exec(request)
 		if err != nil {
-			log.Panic(err)
+			emptySqlError := "Error 1065: Query was empty"
+			if emptySqlError != err.Error() {
+				log.Panic(err)
+			}
 		}
 		count, _ := result.RowsAffected()
 		log.Println("Number of rows affected", count)
