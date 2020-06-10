@@ -31,6 +31,7 @@ func main() {
 			log.Panicln(err)
 		} else {
 			conn := db.SQLDBConn()
+			defer conn.Close()
 			gogit.UpdateDataForRepo(id, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
 			github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), id, url, conn)
 		}

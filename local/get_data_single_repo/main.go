@@ -23,6 +23,7 @@ func main() {
 
 	token := utils.GetAccessToken(password)
 	conn := db.SQLDBConn()
+	defer conn.Close()
 	gogit.UpdateDataForRepo(repoID, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), repoID, url, conn)
 }
