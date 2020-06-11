@@ -38,7 +38,7 @@ jobs:
           app-name: gitwize
           org-name: wizeline
       - run:
-          command: serverless deploy -v
+          command: ./scripts/deploy.sh
           name: deploy
       - slack/status:
           fail_only: false
@@ -59,4 +59,5 @@ workflows:
             branches:
               only:
                 - master
-                - /deploy-.*/
+            tags:
+              only: /^v[0-9]+(.[0-9]+)./
