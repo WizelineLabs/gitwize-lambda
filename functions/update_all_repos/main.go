@@ -23,7 +23,8 @@ const (
 func triggerLambda(p interface{}) {
 	payload, err := json.Marshal(p)
 	if err != nil {
-		log.Panicln(err)
+		log.Println("ERR", err)
+		return
 	}
 
 	mySession := session.Must(session.NewSession())
@@ -61,11 +62,11 @@ func updateAllRepos() {
 	count := 0
 
 	for rows.Next() {
-		count++
 		err := rows.Scan(&id, &name, &url, &password)
 		if err != nil {
-			log.Panicln(err)
+			log.Println("ERR", err)
 		} else {
+			count++
 			payload := gogit.RepoPayload{
 				RepoID:   id,
 				URL:      url,
@@ -76,7 +77,7 @@ func updateAllRepos() {
 			triggerLambda(payload)
 		}
 	}
-	log.Println("Completed update ", count, "repositories")
+	log.Println("Completed trigger update ", count, "repositories")
 }
 
 // Response is of type APIGatewayProxyResponse since we're leveraging the
