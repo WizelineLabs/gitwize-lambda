@@ -23,8 +23,26 @@ type commitDto struct {
 	TimeStamp    string
 }
 
-func (dto *commitDto) getListValues() []interface{} {
-	vals := []interface{}{
+type fileStatDTO struct {
+	RepositoryID int
+	Hash         string
+	Author       string
+	FileName     string
+	AdditionLOC  int
+	DeletionLOC  int
+	Year         int
+	Month        int
+	Day          int
+	Hour         int
+	TimeStamp    string
+}
+
+type dtoInterface interface {
+	getListValues() []interface{}
+}
+
+func (dto commitDto) getListValues() []interface{} {
+	return []interface{}{
 		dto.RepositoryID,
 		dto.Hash,
 		dto.Author,
@@ -40,10 +58,24 @@ func (dto *commitDto) getListValues() []interface{} {
 		dto.Hour,
 		dto.TimeStamp,
 	}
-	return vals
 }
 
-// getCommitDTO return dto object of commit
+func (dto fileStatDTO) getListValues() []interface{} {
+	return []interface{}{
+		dto.RepositoryID,
+		dto.Hash,
+		dto.Author,
+		dto.FileName,
+		dto.AdditionLOC,
+		dto.DeletionLOC,
+		dto.Year,
+		dto.Month,
+		dto.Day,
+		dto.Hour,
+		dto.TimeStamp,
+	}
+}
+
 func getCommitDTO(c *object.Commit) commitDto {
 	dto := commitDto{}
 	dto.Hash = c.Hash.String()
@@ -54,8 +86,8 @@ func getCommitDTO(c *object.Commit) commitDto {
 	dto.Day = c.Author.When.UTC().Day()
 	dto.Hour = c.Author.When.UTC().Hour()
 	dto.TimeStamp = c.Author.When.UTC().String()
-	// dto.LOC = getLineOfCode(c)
-	dto.LOC = 0 // temporary disable getting total loc, to impove perf
+	dto.LOC = getLineOfCode(c)
+	// dto.LOC = 0 // temporary disable getting total loc, to impove perf
 	fileStats, err := c.Stats()
 	if err != nil {
 		log.Panicln(err)
@@ -67,30 +99,6 @@ func getCommitDTO(c *object.Commit) commitDto {
 	}
 	dto.NumParents = c.NumParents()
 	return dto
-}
-
-// getFileStatDTO return file statistic dto
-func getFileStatDTO(c *object.Commit, rID int) []fileStatDTO {
-	fileStats, err := c.Stats()
-	if err != nil {
-		log.Panicln(err)
-	}
-	dtos := make([]fileStatDTO, len(fileStats))
-	for i, file := range fileStats {
-		dto := fileStatDTO{}
-		dto.RepositoryID = rID
-		dto.Hash = c.Hash.String()
-		dto.FileName = file.Name
-		dto.AdditionLOC = file.Addition
-		dto.DeletionLOC = file.Deletion
-		dto.Year = c.Author.When.UTC().Year()
-		dto.Month = int(c.Author.When.UTC().Month())
-		dto.Day = c.Author.When.UTC().Day()
-		dto.Hour = c.Author.When.UTC().Hour()
-		dto.TimeStamp = c.Author.When.UTC().String()
-		dtos[i] = dto
-	}
-	return dtos
 }
 
 func getLineOfCode(c *object.Commit) (loc int) {
@@ -106,16 +114,34 @@ func getLineOfCode(c *object.Commit) (loc int) {
 	return loc
 }
 
-// fileStatDTO data object for file statistic
-type fileStatDTO struct {
-	RepositoryID int
-	Hash         string
-	FileName     string
-	AdditionLOC  int
-	DeletionLOC  int
-	Year         int
-	Month        int
-	Day          int
-	Hour         int
-	TimeStamp    string
+func getFileStatDTO(c *object.Commit, rID int) []fileStatDTO {
+	fileStats, err := c.Stats()
+	if err != nil {
+		log.Panicln(err)
+	}
+	dtos := make([]fileStatDTO, len(fileStats))
+	for i, file := range fileStats {
+		dto := fileStatDTO{}
+		dto.RepositoryID = rID
+		dto.Hash = c.Hash.String()
+		dto.Author = c.Author.Email
+		dto.FileName = file.Name
+		dto.AdditionLOC = file.Addition
+		dto.DeletionLOC = file.Deletion
+		dto.Year = c.Author.When.UTC().Year()
+		dto.Month = int(c.Author.When.UTC().Month())
+		dto.Day = c.Author.When.UTC().Day()
+		dto.Hour = c.Author.When.UTC().Hour()
+		dto.TimeStamp = c.Author.When.UTC().String()
+		dtos[i] = dto
+	}
+	return dtos
+}
+
+func convertFileDtosToDtoInterfaces(fdtos []fileStatDTO) []dtoInterface {
+	result := make([]dtoInterface, len(fdtos))
+	for i, v := range fdtos {
+		result[i] = dtoInterface(v)
+	}
+	return result
 }

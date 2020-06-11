@@ -2,20 +2,16 @@ package gogit
 
 import (
 	"database/sql"
-	"github.com/GitWize/gitwize-lambda/utils"
 	"log"
 	"strings"
-	"time"
 )
 
-func generateBulkCommitStatement(dtos []commitDto) (statement string, valArgs []interface{}) {
-	defer utils.TimeTrack(time.Now(), "generateBulkCommitStatement")
-
-	statement = "INSERT INTO " + commitTable + " (repository_id, hash, author_email, message, num_files, addition_loc, deletion_loc, num_parents, total_loc, year, month, day, hour, commit_time_stamp) "
+func generateSQLStatement(table string, fields []string, dtos []dtoInterface) (string, []interface{}) {
+	statement := "INSERT INTO " + table + " (" + strings.Join(fields, ", ") + ") "
 	values := make([]string, len(dtos))
-	valArgs = []interface{}{}
+	valArgs := []interface{}{}
 	for i, dto := range dtos {
-		values[i] = "(" + strings.Repeat("?, ", 13) + "?)"
+		values[i] = "(" + strings.Repeat("?, ", len(fields)-1) + "?)"
 		args := dto.getListValues()
 		valArgs = append(valArgs, args...)
 	}
@@ -23,10 +19,8 @@ func generateBulkCommitStatement(dtos []commitDto) (statement string, valArgs []
 	return statement, valArgs
 }
 
-func executeBulkStatement(dtos []commitDto, conn *sql.DB) {
-	defer utils.TimeTrack(time.Now(), "executeBulkStatement")
-
-	statement, valArgs := generateBulkCommitStatement(dtos)
+func executeBulkStatement(table string, fields []string, dtos []dtoInterface, conn *sql.DB) {
+	statement, valArgs := generateSQLStatement(table, fields, dtos)
 	result, err := conn.Exec(statement, valArgs...)
 	if err != nil {
 		log.Panicln(err.Error())
