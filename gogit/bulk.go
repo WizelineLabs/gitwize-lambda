@@ -21,10 +21,8 @@ func generateSQLStatement(table string, fields []string, dtos []dtoInterface) (s
 
 func executeBulkStatement(table string, fields []string, dtos []dtoInterface, conn *sql.DB) {
 	statement, valArgs := generateSQLStatement(table, fields, dtos)
-	result, err := conn.Exec(statement, valArgs...)
+	_, err := conn.Exec(statement, valArgs...)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
-	rows, _ := result.RowsAffected()
-	log.Println("number rows affected ", rows)
 }
