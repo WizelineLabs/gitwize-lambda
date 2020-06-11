@@ -20,25 +20,26 @@ func UpdateDataForRepo(repoID int, repoURL, repoName, token, branch string, date
 
 func updateCommitAndFileStatData(commitIter object.CommitIter, repoID int, conn *sql.DB) {
 	defer utils.TimeTrack(time.Now(), "updateCommitAndFileStatData")
-	cdtos := CommitDtos{}
-	fdtos := FileStatDtos{}
+	cdtos := []dtoInterface{}
+	fdtos := []dtoInterface{}
 
 	err := commitIter.ForEach(func(c *object.Commit) error {
-		if len(cdtos.dtos) >= batchSize {
-			executeBulkStatement(cdtos, conn)
-			cdtos = CommitDtos{}
+		if len(cdtos) >= batchSize {
+			executeBulkStatement(commitTable, getCommitFields(), cdtos, conn)
+			cdtos = []dtoInterface{}
 		} else {
 			dto := getCommitDTO(c)
 			dto.RepositoryID = repoID
-			cdtos.append(dto)
+			cdtos = append(cdtos, dtoInterface(dto))
 		}
 
-		if len(fdtos.dtos) >= batchSize {
-			executeBulkStatement(fdtos, conn)
-			fdtos = FileStatDtos{}
+		if len(fdtos) >= batchSize {
+			executeBulkStatement(fileStatTable, getFileStatFields(), fdtos, conn)
+			fdtos = []dtoInterface{}
 		} else {
 			newFileDtos := getFileStatDTO(c, repoID)
-			fdtos.append(newFileDtos)
+			newDtos := convertFileDtosToDtoInterfaces(newFileDtos)
+			fdtos = append(fdtos, newDtos...)
 		}
 
 		return nil
@@ -47,10 +48,10 @@ func updateCommitAndFileStatData(commitIter object.CommitIter, repoID int, conn 
 		log.Panicln(err.Error())
 	}
 
-	if len(cdtos.dtos) > 0 {
-		executeBulkStatement(cdtos, conn)
+	if len(cdtos) > 0 {
+		executeBulkStatement(commitTable, getCommitFields(), cdtos, conn)
 	}
-	if len(fdtos.dtos) > 0 {
-		executeBulkStatement(fdtos, conn)
+	if len(fdtos) > 0 {
+		executeBulkStatement(fileStatTable, getFileStatFields(), fdtos, conn)
 	}
 }

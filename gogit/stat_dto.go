@@ -23,8 +23,26 @@ type commitDto struct {
 	TimeStamp    string
 }
 
-func (dto *commitDto) getListValues() []interface{} {
-	vals := []interface{}{
+type fileStatDTO struct {
+	RepositoryID int
+	Hash         string
+	Author       string
+	FileName     string
+	AdditionLOC  int
+	DeletionLOC  int
+	Year         int
+	Month        int
+	Day          int
+	Hour         int
+	TimeStamp    string
+}
+
+type dtoInterface interface {
+	getListValues() []interface{}
+}
+
+func (dto commitDto) getListValues() []interface{} {
+	return []interface{}{
 		dto.RepositoryID,
 		dto.Hash,
 		dto.Author,
@@ -40,10 +58,24 @@ func (dto *commitDto) getListValues() []interface{} {
 		dto.Hour,
 		dto.TimeStamp,
 	}
-	return vals
 }
 
-// getCommitDTO return dto object of commit
+func (dto fileStatDTO) getListValues() []interface{} {
+	return []interface{}{
+		dto.RepositoryID,
+		dto.Hash,
+		dto.Author,
+		dto.FileName,
+		dto.AdditionLOC,
+		dto.DeletionLOC,
+		dto.Year,
+		dto.Month,
+		dto.Day,
+		dto.Hour,
+		dto.TimeStamp,
+	}
+}
+
 func getCommitDTO(c *object.Commit) commitDto {
 	dto := commitDto{}
 	dto.Hash = c.Hash.String()
@@ -82,39 +114,6 @@ func getLineOfCode(c *object.Commit) (loc int) {
 	return loc
 }
 
-// fileStatDTO data object for file statistic
-type fileStatDTO struct {
-	RepositoryID int
-	Hash         string
-	Author       string
-	FileName     string
-	AdditionLOC  int
-	DeletionLOC  int
-	Year         int
-	Month        int
-	Day          int
-	Hour         int
-	TimeStamp    string
-}
-
-func (dto *fileStatDTO) getListValues() []interface{} {
-	vals := []interface{}{
-		dto.RepositoryID,
-		dto.Hash,
-		dto.Author,
-		dto.FileName,
-		dto.AdditionLOC,
-		dto.DeletionLOC,
-		dto.Year,
-		dto.Month,
-		dto.Day,
-		dto.Hour,
-		dto.TimeStamp,
-	}
-	return vals
-}
-
-// getFileStatDTO return file statistic dto
 func getFileStatDTO(c *object.Commit, rID int) []fileStatDTO {
 	fileStats, err := c.Stats()
 	if err != nil {
@@ -139,18 +138,10 @@ func getFileStatDTO(c *object.Commit, rID int) []fileStatDTO {
 	return dtos
 }
 
-type CommitDtos struct {
-	dtos []commitDto
-}
-
-func (this *CommitDtos) append(dto commitDto) {
-	this.dtos = append(this.dtos, dto)
-}
-
-type FileStatDtos struct {
-	dtos []fileStatDTO
-}
-
-func (this *FileStatDtos) append(dtos []fileStatDTO) {
-	this.dtos = append(this.dtos, dtos...)
+func convertFileDtosToDtoInterfaces(fdtos []fileStatDTO) []dtoInterface {
+	result := make([]dtoInterface, len(fdtos))
+	for i, v := range fdtos {
+		result[i] = dtoInterface(v)
+	}
+	return result
 }
