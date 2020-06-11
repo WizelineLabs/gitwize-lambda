@@ -31,8 +31,8 @@ func GetLastNDayDateRange(n int) DateRange {
 	return DateRange{Since: &since, Until: &until}
 }
 
-// RepoEvent event for update one repo
-type RepoEvent struct {
+// RepoPayload event for update one repo
+type RepoPayload struct {
 	RepoID   int    `json:"RepoID"`
 	URL      string `json:"URL"`
 	RepoName string `json:"RepoName"`

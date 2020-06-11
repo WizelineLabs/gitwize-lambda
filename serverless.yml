@@ -62,10 +62,6 @@ functions:
       USE_DEFAULT_API_TOKEN: "TRUE"
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
-    events:
-      - http:
-          path: update_one_repo
-          method: get
   update_all_repos:
     handler: bin/update_all_repos
     memorySize: 1024

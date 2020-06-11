@@ -10,7 +10,7 @@ import (
 )
 
 // Handler lambda function handler
-func Handler(e gogit.RepoEvent) (string, error) {
+func Handler(e gogit.RepoPayload) (string, error) {
 	log.Println("Repo Event", e)
 	conn := db.SQLDBConn()
 	defer conn.Close()

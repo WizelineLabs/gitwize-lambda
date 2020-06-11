@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/aws/aws-lambda-go/events"
-	lbd "github.com/aws/aws-lambda-go/lambda"
-
-	"database/sql"
 	"github.com/GitWize/gitwize-lambda/db"
 	"github.com/GitWize/gitwize-lambda/gogit"
+	"github.com/aws/aws-lambda-go/events"
+	lbd "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -19,63 +17,67 @@ import (
 const (
 	updateOneRepoFuncName = "gitwize-lambda-dev-update_one_repo"
 	awsRegion             = "ap-southeast-1"
+	defaultBranch         = ""
 )
+
+func triggerLambda(p interface{}) {
+	payload, err := json.Marshal(p)
+	if err != nil {
+		log.Println("ERR", err)
+		return
+	}
+
+	mySession := session.Must(session.NewSession())
+	svc := lambda.New(mySession, aws.NewConfig().WithRegion(awsRegion))
+
+	input := &lambda.InvokeInput{
+		InvocationType: aws.String("Event"),
+		FunctionName:   aws.String(updateOneRepoFuncName),
+		Payload:        payload,
+		LogType:        aws.String("Tail"),
+	}
+
+	_, err = svc.Invoke(input)
+	if err != nil {
+		log.Println("ERR invoke lambda", err)
+	}
+}
 
 // Ref: https://docs.aws.amazon.com/sdk-for-go/api/aws/
 // Ref: https://godoc.org/github.com/aws/aws-sdk-go/service/lambda#
 func updateAllRepos() {
-	log.Println("Start updating all repositories")
 	conn := db.SQLDBConn()
 	defer conn.Close()
 
-	rows, _ := conn.Query("SELECT id, name, url, password FROM repository")
+	fields := []string{"id", "name", "url", "password"}
+	rows := db.GetAllRepoRows(fields)
 
 	var id int
-	var name, url string
-	password := sql.NullString{
-		String: "",
-		Valid:  false,
-	}
+	var name, url, password string
+
 	if rows == nil {
 		log.Printf("[WARN] No repositories found")
 		return
 	}
 	count := 0
+
 	for rows.Next() {
-		count++
 		err := rows.Scan(&id, &name, &url, &password)
 		if err != nil {
-			log.Panicln(err)
+			log.Println("ERR", err)
 		} else {
-			p := gogit.RepoEvent{
+			count++
+			payload := gogit.RepoPayload{
 				RepoID:   id,
 				URL:      url,
 				RepoName: name,
-				RepoPass: password.String,
-				Branch:   "",
+				RepoPass: password,
+				Branch:   defaultBranch,
 			}
-			payload, err := json.Marshal(p)
-			if err != nil {
-				log.Panicln(err)
-			}
-
-			mySession := session.Must(session.NewSession())
-			svc := lambda.New(mySession, aws.NewConfig().WithRegion(awsRegion))
-
-			input := &lambda.InvokeInput{
-				InvocationType: aws.String("Event"),
-				FunctionName:   aws.String(updateOneRepoFuncName),
-				Payload:        payload,
-				LogType:        aws.String("Tail"),
-			}
-
-			_, err = svc.Invoke(input)
-			if err != nil {
-				log.Println("ERR invoke lambda", err)
-			}
+			triggerLambda(payload)
 		}
 	}
-	log.Println("Completed update ", count, "repositories")
+	log.Println("Completed trigger update ", count, "repositories")
 }
 
 // Response is of type APIGatewayProxyResponse since we're leveraging the
