@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/GitWize/gitwize-lambda/db"
 	"github.com/GitWize/gitwize-lambda/gogit"
 	"log"
 	"os"
@@ -19,7 +18,5 @@ func main() {
 
 	url = "https://github.com/wizeline/gitwize-be"
 	go gogit.GetRepo("gitwize-be", url, token)
-
-	db.UpdateMetricTable()
 	time.Sleep(10 * time.Second)
 }

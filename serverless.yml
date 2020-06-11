@@ -26,7 +26,7 @@ provider:
   runtime: go1.x
 
 # you can overwrite defaults here
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: ap-southeast-1
 
 
@@ -62,6 +62,7 @@ functions:
       USE_DEFAULT_API_TOKEN: "TRUE"
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
+      APP_STAGE: ${opt:stage}
   update_all_repos:
     handler: bin/update_all_repos
     memorySize: 1024
@@ -71,6 +72,7 @@ functions:
       USE_DEFAULT_API_TOKEN: "TRUE"
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
+      APP_STAGE: ${opt:stage}
     events:
       - http:
           path: update_all_repos
@@ -85,6 +87,7 @@ functions:
       USE_DEFAULT_API_TOKEN: "TRUE"
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
+      APP_STAGE: ${opt:stage}
     events:
       - http:
           path: update_single
@@ -95,6 +98,7 @@ functions:
     timeout: 900
     environment:
       DB_CONN_STRING: ${env:DB_CONN_STRING}
+      APP_STAGE: ${opt:stage}
     events:
       - http:
           path: load_metric

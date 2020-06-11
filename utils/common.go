@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	functionPrefix = "gitwize-lambda-"
+)
+
 // TimeTrack use with defer to track processing time of a function
 func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
@@ -22,4 +26,18 @@ func GetAccessToken(repoPass string) (accessToken string) {
 		accessToken = cypher.DecryptString(repoPass, os.Getenv("CYPHER_PASS_PHASE"))
 	}
 	return accessToken
+}
+
+//GetAppStage return deployed environment dev/qa/prod...
+func GetAppStage() string {
+	stage := os.Getenv("APP_STAGE")
+	if stage == "" {
+		stage = "dev"
+	}
+	return stage
+}
+
+//GetUpdateOneRepoFuncName return update-one-repo function name
+func GetUpdateOneRepoFuncName() string {
+	return functionPrefix + GetAppStage() + "-update_one_repo"
 }

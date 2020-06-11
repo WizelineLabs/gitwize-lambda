@@ -16,7 +16,6 @@ import (
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Printf("Processing request data for request %s.\n", request.RequestContext.RequestID)
 	log.Println("querystring", request.QueryStringParameters)
-	log.Println("pathparam", request.PathParameters)
 	conn := db.SQLDBConn()
 	defer conn.Close()
 
