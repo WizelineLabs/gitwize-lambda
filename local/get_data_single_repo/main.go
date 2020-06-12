@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	// need parameter of repo
 	id, name, url := os.Args[1], os.Args[2], os.Args[3]
 	if id == "" || name == "" || url == "" {
 		log.Panic("missing arguments")

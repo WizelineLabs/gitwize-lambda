@@ -13,7 +13,7 @@ import (
 
 // GetRepo clone repo to local file sys to avoid memory issue
 func GetRepo(repoName, repoURL, token string) *git.Repository {
-	defer utils.TimeTrack(time.Now(), "GetRepo")
+	defer utils.TimeTrack(time.Now(), "GetRepo "+repoName)
 
 	repoPath := directory + "/" + repoName
 	os.RemoveAll(repoPath)
@@ -28,7 +28,7 @@ func GetRepo(repoName, repoURL, token string) *git.Repository {
 	})
 
 	if err != nil {
-		log.Panic(err)
+		log.Panic(repoName, err)
 	}
 
 	return r
@@ -36,7 +36,6 @@ func GetRepo(repoName, repoURL, token string) *git.Repository {
 
 //GetCommitIterFromBranch return CommitIter object
 func GetCommitIterFromBranch(r *git.Repository, branch string, dateRange DateRange) object.CommitIter {
-	defer utils.TimeTrack(time.Now(), "GetCommitIterFromBranch")
 	ref, err := r.Head()
 	if err != nil {
 		log.Panic(err)
