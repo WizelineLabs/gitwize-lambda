@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/GitWize/gitwize-lambda/db"
-	"github.com/GitWize/gitwize-lambda/gogit"
+	"gitwize-lambda/db"
+	"gitwize-lambda/gogit"
+	"log"
+
 	"github.com/aws/aws-lambda-go/events"
 	lbd "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
-	"log"
 )
 
 const (

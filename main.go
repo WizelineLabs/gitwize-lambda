@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/GitWize/gitwize-lambda/db"
-	"github.com/GitWize/gitwize-lambda/gogit"
+	"gitwize-lambda/db"
+	"gitwize-lambda/gogit"
 	"log"
 	"os"
 	"time"
