@@ -35,4 +35,6 @@ https://www.serverless.com/framework/docs/providers/aws/guide/quick-start/
 
 - install aws cli and config with aws credentials (user in aws iam `lambda`) and config region `ap-southeast-1`
 
-- build and deploy: `make && sls deploy`
+- build and deploy dev: `make && sls deploy --stage dev`
+
+- build and deploy qa: `make && sls deploy --stage qa`
