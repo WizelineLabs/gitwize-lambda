@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/GitWize/gitwize-lambda/db"
+	"gitwize-lambda/db"
+	"log"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"log"
 )
 
 // Handler lambda function handler

@@ -2,13 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"gitwize-lambda/db"
+	"gitwize-lambda/github"
+	"gitwize-lambda/gogit"
+	"gitwize-lambda/utils"
 	"log"
 	"time"
-
-	"github.com/GitWize/gitwize-lambda/db"
-	"github.com/GitWize/gitwize-lambda/github"
-	"github.com/GitWize/gitwize-lambda/gogit"
-	"github.com/GitWize/gitwize-lambda/utils"
 )
 
 func main() {

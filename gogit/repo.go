@@ -1,14 +1,15 @@
 package gogit
 
 import (
-	"github.com/GitWize/gitwize-lambda/utils"
+	"gitwize-lambda/utils"
+	"log"
+	"os"
+	"time"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"log"
-	"os"
-	"time"
 )
 
 // GetRepo clone repo to local file sys to avoid memory issue

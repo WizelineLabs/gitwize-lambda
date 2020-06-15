@@ -14,12 +14,12 @@ package github
 import (
 	"context"
 	"database/sql"
+	"gitwize-lambda/utils"
 	"log"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/GitWize/gitwize-lambda/utils"
 	"github.com/google/go-github/v31/github"
 	"golang.org/x/oauth2"
 )
