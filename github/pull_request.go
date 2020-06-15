@@ -14,13 +14,14 @@ package github
 import (
 	"context"
 	"database/sql"
-	"github.com/GitWize/gitwize-lambda/utils"
-	"github.com/google/go-github/v31/github"
-	"golang.org/x/oauth2"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/GitWize/gitwize-lambda/utils"
+	"github.com/google/go-github/v31/github"
+	"golang.org/x/oauth2"
 )
 
 type PullRequestService interface {
@@ -75,11 +76,19 @@ func CollectPRsOfRepo(prSvc PullRequestService, id int, url string, conn *sql.DB
 }
 
 func collectPRsOfRepo(prSvc PullRequestService, id int, owner string, repo string, conn *sql.DB) {
-	deleteStmt, err := conn.Prepare("DELETE FROM pull_request WHERE repository_id = ?")
-	defer deleteStmt.Close()
+	lastMetricUpdated := sql.NullTime{
+		Time:  time.Unix(0, 0),
+		Valid: false,
+	}
+	selectStmt, err := conn.Prepare("SELECT ctl_last_metric_updated FROM repository WHERE id = ?")
+	defer selectStmt.Close()
 
-	// delete old data
-	_, err = deleteStmt.Exec(id)
+	if err != nil {
+		log.Printf("[ERROR] %s", err)
+		return
+	}
+
+	err = selectStmt.QueryRow(id).Scan(&lastMetricUpdated)
 	if err != nil {
 		log.Printf("[ERROR] %s", err)
 		return
@@ -93,7 +102,7 @@ func collectPRsOfRepo(prSvc PullRequestService, id int, owner string, repo strin
 	for {
 		prs, _, err := prSvc.List(owner, repo, &github.PullRequestListOptions{
 			State:       "all",
-			Sort:        "created",
+			Sort:        "updated",
 			Direction:   "desc",
 			ListOptions: listOpt,
 		})
@@ -105,15 +114,34 @@ func collectPRsOfRepo(prSvc PullRequestService, id int, owner string, repo strin
 		if len(prs) == 0 {
 			break
 		}
+
+		filteredPrs := []*github.PullRequest{}
+		stopFetching := false
+		for _, pr := range prs {
+			updatedAt := (*pr).UpdatedAt.Add(time.Duration(24) * time.Hour) // include prs updated on previous date in the run
+			if updatedAt.After(lastMetricUpdated.Time) {
+				filteredPrs = append(filteredPrs, pr)
+			} else {
+				stopFetching = true
+				break
+			}
+		}
 		insertPRs(prSvc, id, prs, conn)
 
+		if stopFetching {
+			break
+		}
 		listOpt.Page++
 	}
 }
 
 func insertPRs(prSvc PullRequestService, repoID int, prs []*github.PullRequest, conn *sql.DB) {
 	// Prepare statements
-	insertStmt, err := conn.Prepare("INSERT INTO pull_request (repository_id, url, pr_no, title, body, head, base, state, created_by, created_year, created_month, created_day, created_hour, closed_year, closed_month, closed_day, closed_hour) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	sql := `INSERT INTO pull_request (repository_id, url, pr_no, title, body, head, base, state, created_by, created_year, created_month, created_day, created_hour, closed_year, closed_month, closed_day, closed_hour)
+			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON DUPLICATE KEY UPDATE state = ?, title = ?, body = ?, head = ?, base = ?, closed_year = ?, closed_month = ?, closed_day = ?, closed_hour = ?`
+	insertStmt, err := conn.Prepare(sql)
+
 	if err != nil {
 		log.Printf("[ERROR] %s", err)
 		return
@@ -134,18 +162,21 @@ func insertPRs(prSvc PullRequestService, repoID int, prs []*github.PullRequest, 
 		monthCreated := yearCreated*100 + int(created.Month())
 		dayCreated := monthCreated*100 + created.Day()
 		hourCreated := dayCreated*100 + created.Hour()
+		var yearClosed, monthClosed, dayClosed, hourClosed int
 		if pr.ClosedAt != nil {
-			yearClosed := pr.ClosedAt.Year()
-			monthClosed := yearClosed*100 + int(pr.ClosedAt.Month())
-			dayClosed := monthClosed*100 + pr.ClosedAt.Day()
-			hourClosed := dayClosed*100 + pr.ClosedAt.Hour()
-			insertStmt.Exec(repoID, pr.HTMLURL, pr.Number, pr.Title, pr.Body, pr.Head.Ref, pr.Base.Ref, state, pr.User.Login,
-				yearCreated, monthCreated, dayCreated, hourCreated,
-				yearClosed, monthClosed, dayClosed, hourClosed)
-		} else {
-			insertStmt.Exec(repoID, pr.HTMLURL, pr.Number, pr.Title, pr.Body, pr.Head.Ref, pr.Base.Ref, state, pr.User.Login,
-				yearCreated, monthCreated, dayCreated, hourCreated,
-				nil, nil, nil, nil)
+			yearClosed = pr.ClosedAt.Year()
+			monthClosed = yearClosed*100 + int(pr.ClosedAt.Month())
+			dayClosed = monthClosed*100 + pr.ClosedAt.Day()
+			hourClosed = dayClosed*100 + pr.ClosedAt.Hour()
+		}
+		_, err := insertStmt.Exec(repoID, pr.HTMLURL, pr.Number, pr.Title, pr.Body, pr.Head.Ref, pr.Base.Ref, state, pr.User.Login,
+			yearCreated, monthCreated, dayCreated, hourCreated,
+			yearClosed, monthClosed, dayClosed, hourClosed,
+			state, pr.Title, pr.Body, pr.Head.Ref, pr.Base.Ref, yearClosed, monthClosed, dayClosed, hourClosed)
+
+		if err != nil {
+			log.Printf("[ERROR] %s", err)
+			return
 		}
 	}
 }
