@@ -126,7 +126,7 @@ func collectPRsOfRepo(prSvc PullRequestService, id int, owner string, repo strin
 				break
 			}
 		}
-		insertPRs(prSvc, id, prs, conn)
+		insertPRs(prSvc, id, filteredPrs, conn)
 
 		if stopFetching {
 			break
