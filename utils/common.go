@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/GitWize/gitwize-lambda/cypher"
+	"gitwize-lambda/cypher"
 	"log"
 	"os"
 	"time"

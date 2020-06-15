@@ -2,11 +2,12 @@ package gogit
 
 import (
 	"database/sql"
-	"github.com/GitWize/gitwize-lambda/utils"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	"gitwize-lambda/utils"
 	"log"
 	"time"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type CommitData struct {

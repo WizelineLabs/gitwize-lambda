@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GitWize/gitwize-lambda/db"
-	"github.com/GitWize/gitwize-lambda/github"
-	"github.com/GitWize/gitwize-lambda/gogit"
-	"github.com/GitWize/gitwize-lambda/utils"
+	"gitwize-lambda/db"
+	"gitwize-lambda/github"
+	"gitwize-lambda/gogit"
+	"gitwize-lambda/utils"
 	"log"
 	"time"
 )
