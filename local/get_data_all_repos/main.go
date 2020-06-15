@@ -2,12 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"log"
+	"time"
+
 	"github.com/GitWize/gitwize-lambda/db"
 	"github.com/GitWize/gitwize-lambda/github"
 	"github.com/GitWize/gitwize-lambda/gogit"
 	"github.com/GitWize/gitwize-lambda/utils"
-	"log"
-	"time"
 )
 
 func main() {
@@ -62,5 +63,6 @@ func getDataOneRepo(c chan bool, id int, url, name, token string, conn *sql.DB) 
 	}()
 	gogit.UpdateDataForRepo(id, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), id, url, conn)
+	db.UpdateRepoLastUpdated(id)
 	flag = true
 }

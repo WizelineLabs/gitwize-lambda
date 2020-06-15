@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/GitWize/gitwize-lambda/db"
-	"github.com/GitWize/gitwize-lambda/github"
-	"github.com/GitWize/gitwize-lambda/gogit"
-	"github.com/GitWize/gitwize-lambda/utils"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/GitWize/gitwize-lambda/db"
+	"github.com/GitWize/gitwize-lambda/github"
+	"github.com/GitWize/gitwize-lambda/gogit"
+	"github.com/GitWize/gitwize-lambda/utils"
 )
 
 func main() {
@@ -29,4 +30,5 @@ func main() {
 	defer conn.Close()
 	gogit.UpdateDataForRepo(repoID, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), repoID, url, conn)
+	db.UpdateRepoLastUpdated(repoID)
 }

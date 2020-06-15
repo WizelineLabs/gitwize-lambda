@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"log"
+
 	"github.com/GitWize/gitwize-lambda/db"
 	"github.com/GitWize/gitwize-lambda/gogit"
 	"github.com/aws/aws-lambda-go/events"
@@ -11,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
-	"log"
 )
 
 const (
@@ -75,6 +76,7 @@ func updateAllRepos() {
 				Branch:   defaultBranch,
 			}
 			triggerLambda(payload)
+			db.UpdateRepoLastUpdated(id)
 		}
 	}
 	log.Println("Completed trigger update ", count, "repositories")
