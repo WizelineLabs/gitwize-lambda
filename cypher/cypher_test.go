@@ -39,3 +39,12 @@ func Test_EncryptAndDecryptString(t *testing.T) {
 		t.Errorf("expected %s, got %s", testString, decrypted)
 	}
 }
+
+func Test_DecodeBase64(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	DecodeBase64("**&^!!")
+}

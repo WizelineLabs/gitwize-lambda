@@ -2,12 +2,10 @@ package gogit
 
 import (
 	"database/sql"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"gitwize-lambda/utils"
 	"log"
 	"time"
-
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type CommitData struct {
@@ -18,8 +16,7 @@ type CommitData struct {
 // UpdateDataForRepo update data for public/private remote repo using in memory clone
 func UpdateDataForRepo(repoID int, repoURL, repoName, token, branch string, dateRange DateRange, conn *sql.DB) {
 	defer utils.TimeTrack(time.Now(), "UpdateDataForRepo "+repoName)
-	var r *git.Repository
-	r = GetRepo(repoName, repoURL, token)
+	r := GetRepo(repoName, repoURL, token)
 	commitIter := GetCommitIterFromBranch(r, branch, dateRange)
 	updateCommitAndFileStatData(commitIter, repoID, conn)
 }

@@ -1,8 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
-	lbd "github.com/aws/aws-lambda-go/lambda"
+	lambda2 "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -12,38 +13,37 @@ import (
 	"log"
 )
 
-const (
-	awsRegion = "ap-southeast-1"
-)
+type awsLambda interface {
+	Trigger(payload interface{}, funcName string, awsRegion string) error
+}
 
-func triggerLambda(p interface{}, functionName string) {
-	payload, err := json.Marshal(p)
+type lambdaClient struct{}
+
+func (t lambdaClient) Trigger(payloadValues interface{}, funcName string, awsRegion string) error {
+	payload, err := json.Marshal(payloadValues)
 	if err != nil {
-		log.Println("ERR", err)
+		return err
 	}
-
 	mySession := session.Must(session.NewSession())
 	svc := lambda.New(mySession, aws.NewConfig().WithRegion(awsRegion))
-
 	input := &lambda.InvokeInput{
 		InvocationType: aws.String("Event"),
-		FunctionName:   aws.String(functionName),
+		FunctionName:   aws.String(funcName),
 		Payload:        payload,
 		LogType:        aws.String("Tail"),
 	}
-
 	_, err = svc.Invoke(input)
-	if err != nil {
-		log.Println("ERR invoke lambda", err)
-	}
+	return err
 }
 
-func updateAllRepos() {
-	conn := db.SQLDBConn()
-	defer conn.Close()
+type dbInterface interface {
+	UpdateRepoLastUpdated(id int)
+	GetAllRepoRows(fields []string) *sql.Rows
+}
 
+func updateAllRepos(lbd awsLambda, awsRegion string, mydb dbInterface) {
 	fields := []string{"id", "name", "url", "password"}
-	rows := db.GetAllRepoRows(fields)
+	rows := mydb.GetAllRepoRows(fields)
 
 	var id int
 	var name, url, password string
@@ -54,13 +54,11 @@ func updateAllRepos() {
 	}
 
 	count := 0
-
 	for rows.Next() {
 		err := rows.Scan(&id, &name, &url, &password)
 		if err != nil {
 			log.Println("ERR", err)
 		} else {
-			count++
 			payload := gogit.RepoPayload{
 				RepoID:   id,
 				URL:      url,
@@ -68,19 +66,24 @@ func updateAllRepos() {
 				RepoPass: password,
 				Branch:   "",
 			}
-			triggerLambda(payload, utils.GetUpdateOneRepoFuncName())
-			db.UpdateRepoLastUpdated(id)
+			err := lbd.Trigger(payload, utils.GetUpdateOneRepoFuncName(), awsRegion)
+			if err != nil {
+				log.Println("ERR", err)
+			} else {
+				mydb.UpdateRepoLastUpdated(id)
+				count++
+			}
 		}
 	}
-	log.Println("Completed trigger update ", count, "repositories")
+	log.Println("Completed update ", count, "repositories")
 }
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
 func Handler() (string, error) {
-	updateAllRepos()
-	return "update all repositories triggered", nil
+	updateAllRepos(lambdaClient{}, "ap-southeast-1", db.NewCommonOps())
+	return "Update all repositories completed", nil
 }
 
 func main() {
-	lbd.Start(Handler)
+	lambda2.Start(Handler)
 }

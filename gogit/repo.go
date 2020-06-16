@@ -16,8 +16,10 @@ import (
 func GetRepo(repoName, repoURL, token string) *git.Repository {
 	defer utils.TimeTrack(time.Now(), "GetRepo "+repoName)
 
-	repoPath := directory + "/" + repoName
+	repoPath := tmpDirectory + "/" + repoName
+	log.Println("removing ", repoPath)
 	os.RemoveAll(repoPath)
+	time.Sleep(2 * time.Second)
 	r, err := git.PlainClone(repoPath, false, &git.CloneOptions{
 		Auth: &http.BasicAuth{
 			Username: "nonempty",
@@ -29,7 +31,8 @@ func GetRepo(repoName, repoURL, token string) *git.Repository {
 	})
 
 	if err != nil {
-		log.Panic(repoName, err)
+		log.Println(token, repoName)
+		log.Panicf("ERR repo: %s, %s", repoName, err)
 	}
 
 	return r

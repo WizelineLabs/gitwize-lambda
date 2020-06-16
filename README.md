@@ -29,6 +29,13 @@ lambda functions to retrieve and process data for gitwize (commit data, PR data,
 for example:
 `go run local/get_data_single_repo/main.go 61 go-git https://github.com/go-git/go-git.git`
 
+## Run Unit & Integration test local:
+- clone `gitwize-be` repo and run `docker-compose up` from that repo
+
+- `go test -count=1 ./... -coverprofile cover.out; go tool cover -func cover.out`
+
+Note that the test require and will affect local database.
+
 ## Build and deploy to cloud
 - install serverless framework
 https://www.serverless.com/framework/docs/providers/aws/guide/quick-start/
@@ -38,3 +45,7 @@ https://www.serverless.com/framework/docs/providers/aws/guide/quick-start/
 - build and deploy dev: `make && sls deploy --stage dev`
 
 - build and deploy qa: `make && sls deploy --stage qa`
+
+## CI / CD
+- CircleCI build job will download `gitwize-be` and create mysql db for integration test
+- CircleCI deploy run similar command as deploy to cloud above
