@@ -27,6 +27,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	name := request.QueryStringParameters["name"]
 	gogit.UpdateDataForRepo(repoID, url, name, token, "", dateRange, conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), repoID, url, conn)
+	db.UpdateRepoLastUpdated(repoID)
 	msg := "update completed for repo " + name
 	return events.APIGatewayProxyResponse{Body: msg, StatusCode: 200}, nil
 }

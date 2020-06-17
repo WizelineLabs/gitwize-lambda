@@ -62,5 +62,6 @@ func getDataOneRepo(c chan bool, id int, url, name, token string, conn *sql.DB) 
 	}()
 	gogit.UpdateDataForRepo(id, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), id, url, conn)
+	db.UpdateRepoLastUpdated(id)
 	flag = true
 }

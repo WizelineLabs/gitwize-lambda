@@ -74,6 +74,7 @@ func updateAllRepos() {
 				Branch:   "",
 			}
 			triggerLambda(payload, utils.GetUpdateOneRepoFuncName())
+			db.UpdateRepoLastUpdated(id)
 		}
 	}
 	log.Println("Completed trigger update ", count, "repositories")

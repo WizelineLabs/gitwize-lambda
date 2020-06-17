@@ -20,6 +20,7 @@ func Handler(e gogit.RepoPayload) (string, error) {
 	token := utils.GetAccessToken(e.RepoPass)
 	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), e.RepoID, e.URL, conn)
+	db.UpdateRepoLastUpdated(e.RepoID)
 	resp := "Update Repo Completed"
 	return resp, nil
 }

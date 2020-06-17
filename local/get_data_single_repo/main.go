@@ -29,4 +29,5 @@ func main() {
 	defer conn.Close()
 	gogit.UpdateDataForRepo(repoID, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), repoID, url, conn)
+	db.UpdateRepoLastUpdated(repoID)
 }
