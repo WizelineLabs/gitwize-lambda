@@ -4,28 +4,25 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"gitwize-lambda/db"
-	"gitwize-lambda/gogit"
-	"log"
-
 	"github.com/aws/aws-lambda-go/events"
 	lbd "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
+	"gitwize-lambda/db"
+	"gitwize-lambda/gogit"
+	"gitwize-lambda/utils"
+	"log"
 )
 
 const (
-	updateOneRepoFuncName = "gitwize-lambda-dev-update_one_repo"
-	awsRegion             = "ap-southeast-1"
-	defaultBranch         = ""
+	awsRegion = "ap-southeast-1"
 )
 
-func triggerLambda(p interface{}) {
+func triggerLambda(p interface{}, functionName string) {
 	payload, err := json.Marshal(p)
 	if err != nil {
 		log.Println("ERR", err)
-		return
 	}
 
 	mySession := session.Must(session.NewSession())
@@ -33,7 +30,7 @@ func triggerLambda(p interface{}) {
 
 	input := &lambda.InvokeInput{
 		InvocationType: aws.String("Event"),
-		FunctionName:   aws.String(updateOneRepoFuncName),
+		FunctionName:   aws.String(functionName),
 		Payload:        payload,
 		LogType:        aws.String("Tail"),
 	}
@@ -60,6 +57,7 @@ func updateAllRepos() {
 		log.Printf("[WARN] No repositories found")
 		return
 	}
+
 	count := 0
 
 	for rows.Next() {
@@ -73,9 +71,9 @@ func updateAllRepos() {
 				URL:      url,
 				RepoName: name,
 				RepoPass: password,
-				Branch:   defaultBranch,
+				Branch:   "",
 			}
-			triggerLambda(payload)
+			triggerLambda(payload, utils.GetUpdateOneRepoFuncName())
 			db.UpdateRepoLastUpdated(id)
 		}
 	}
