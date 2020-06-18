@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gitwize-lambda/db"
-	"gitwize-lambda/utils"
+	"github.com/wizeline/gitwize-lambda/db"
+	"github.com/wizeline/gitwize-lambda/utils"
 	"time"
 )
 

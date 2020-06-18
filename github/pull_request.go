@@ -14,7 +14,7 @@ package github
 import (
 	"context"
 	"database/sql"
-	"gitwize-lambda/utils"
+	"github.com/wizeline/gitwize-lambda/utils"
 	"log"
 	"os"
 	"strings"

@@ -2,7 +2,7 @@ package gogit
 
 import (
 	"database/sql"
-	"gitwize-lambda/utils"
+	"github.com/wizeline/gitwize-lambda/utils"
 	"log"
 	"time"
 

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"gitwize-lambda/utils"
+	"github.com/wizeline/gitwize-lambda/utils"
 	"io/ioutil"
 	"log"
 	"strings"

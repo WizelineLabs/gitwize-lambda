@@ -1,14 +1,14 @@
 package utils
 
 import (
-	"gitwize-lambda/cypher"
+	"github.com/wizeline/gitwize-lambda/cypher"
 	"log"
 	"os"
 	"time"
 )
 
 const (
-	functionPrefix = "gitwize-lambda-"
+	functionPrefix = "github.com/wizeline/gitwize-lambda-"
 )
 
 // TimeTrack use with defer to track processing time of a function

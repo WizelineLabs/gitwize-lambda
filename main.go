@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gitwize-lambda/gogit"
+	"github.com/wizeline/gitwize-lambda/gogit"
 	"log"
 	"os"
 	"time"

@@ -1,4 +1,4 @@
-module gitwize-lambda
+module github.com/wizeline/gitwize-lambda
 
 go 1.14
 

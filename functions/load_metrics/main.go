@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"gitwize-lambda/db"
+	"github.com/wizeline/gitwize-lambda/db"
 	"log"
 
 	"github.com/aws/aws-lambda-go/events"

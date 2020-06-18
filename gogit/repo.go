@@ -1,7 +1,7 @@
 package gogit
 
 import (
-	"gitwize-lambda/utils"
+	"github.com/wizeline/gitwize-lambda/utils"
 	"log"
 	"os"
 	"time"

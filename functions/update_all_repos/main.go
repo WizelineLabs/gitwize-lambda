@@ -9,9 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
-	"gitwize-lambda/db"
-	"gitwize-lambda/gogit"
-	"gitwize-lambda/utils"
+	"github.com/wizeline/gitwize-lambda/db"
+	"github.com/wizeline/gitwize-lambda/gogit"
+	"github.com/wizeline/gitwize-lambda/utils"
 	"log"
 )
 

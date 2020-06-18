@@ -1,10 +1,10 @@
 package main
 
 import (
-	"gitwize-lambda/db"
-	"gitwize-lambda/github"
-	"gitwize-lambda/gogit"
-	"gitwize-lambda/utils"
+	"github.com/wizeline/gitwize-lambda/db"
+	"github.com/wizeline/gitwize-lambda/github"
+	"github.com/wizeline/gitwize-lambda/gogit"
+	"github.com/wizeline/gitwize-lambda/utils"
 	"log"
 	"os"
 	"strconv"
