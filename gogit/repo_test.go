@@ -11,23 +11,21 @@ const (
 	repoURL  = "https://github.com/sang-d/mock-repo"
 )
 
-func TestMain(t *testing.T) {
-	utils.SetupIntegrationTest()
-}
+func TestIntegrationGetCommitIterFromBranch(t *testing.T) {
+	if utils.IntegrationTestEnabled() {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("The code did not panic")
+			}
+		}()
 
-func TestGetCommitIterFromBranch(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
+		repoPath := tmpDirectory + "/" + repoName
+		os.RemoveAll(repoPath)
+		r := GetRepo(repoName, repoURL, os.Getenv("DEFAULT_GITHUB_TOKEN"))
+		obj := GetCommitIterFromBranch(r, "master", GetFullGitDateRange())
+		if obj == nil {
+			t.Errorf("Failed to get commit iter, check if test repo and branch exist %s", repoURL)
 		}
-	}()
-
-	repoPath := tmpDirectory + "/" + repoName
-	os.RemoveAll(repoPath)
-	r := GetRepo(repoName, repoURL, os.Getenv("DEFAULT_GITHUB_TOKEN"))
-	obj := GetCommitIterFromBranch(r, "master", GetFullGitDateRange())
-	if obj == nil {
-		t.Errorf("Failed to get commit iter, check if test repo and branch exist %s", repoURL)
+		GetCommitIterFromBranch(r, "NonExistBranch ", GetFullGitDateRange()) // test panic
 	}
-	GetCommitIterFromBranch(r, "NonExistBranch ", GetFullGitDateRange()) // test panic
 }

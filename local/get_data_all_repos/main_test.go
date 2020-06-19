@@ -6,6 +6,7 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	utils.SetupIntegrationTest()
-	main() //can disable as it might run quite long ~20s
+	if utils.IntegrationTestEnabled() {
+		main()
+	}
 }

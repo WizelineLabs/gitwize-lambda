@@ -30,11 +30,21 @@ for example:
 `go run local/get_data_single_repo/main.go 61 go-git https://github.com/go-git/go-git.git`
 
 ## Run Unit & Integration test local:
-- clone `gitwize-be` repo and run `docker-compose up` from that repo
+
+### Running Unit Tests only:
 
 - `go test -count=1 ./... -coverprofile cover.out; go tool cover -func cover.out`
 
-Note that the test require and will affect local database.
+### Running Unit Tests + Integration Tests:
+
+- make sure `docker-compose up` is run from `gitwize-be`
+
+- ```export GITWIZE_INTEGRATION_TEST="TRUE"```
+
+- `go test -count=1 ./... -coverprofile cover.out; go tool cover -func cover.out`
+
+Note that integration tests require and will affect local database. Integration tests always run during CI and be using for total coverage.
+
 
 ## Build and deploy to cloud
 - install serverless framework

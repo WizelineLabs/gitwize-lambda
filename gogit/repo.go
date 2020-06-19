@@ -1,15 +1,14 @@
 package gogit
 
 import (
-	"gitwize-lambda/utils"
-	"log"
-	"os"
-	"time"
-
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"gitwize-lambda/utils"
+	"log"
+	"os"
+	"time"
 )
 
 // GetRepo clone repo to local file sys to avoid memory issue
@@ -17,9 +16,7 @@ func GetRepo(repoName, repoURL, token string) *git.Repository {
 	defer utils.TimeTrack(time.Now(), "GetRepo "+repoName)
 
 	repoPath := tmpDirectory + "/" + repoName
-	log.Println("removing ", repoPath)
 	os.RemoveAll(repoPath)
-	time.Sleep(2 * time.Second)
 	r, err := git.PlainClone(repoPath, false, &git.CloneOptions{
 		Auth: &http.BasicAuth{
 			Username: "nonempty",
@@ -31,7 +28,6 @@ func GetRepo(repoName, repoURL, token string) *git.Repository {
 	})
 
 	if err != nil {
-		log.Println(token, repoName)
 		log.Panicf("ERR repo: %s, %s", repoName, err)
 	}
 
