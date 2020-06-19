@@ -1,13 +1,12 @@
 package main
 
 import (
+	"github.com/aws/aws-lambda-go/lambda"
 	"gitwize-lambda/db"
 	"gitwize-lambda/github"
 	"gitwize-lambda/gogit"
 	"gitwize-lambda/utils"
 	"log"
-
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 // Handler lambda function handler
@@ -21,7 +20,7 @@ func Handler(e gogit.RepoPayload) (string, error) {
 	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), e.RepoID, e.URL, conn)
 	db.UpdateRepoLastUpdated(e.RepoID)
-	resp := "Update Repo Completed"
+	resp := "Update Repo " + e.RepoName + " Completed"
 	return resp, nil
 }
 

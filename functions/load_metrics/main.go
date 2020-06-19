@@ -1,20 +1,14 @@
 package main
 
 import (
-	"context"
-	"gitwize-lambda/db"
-	"log"
-
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"gitwize-lambda/db"
 )
 
 // Handler lambda function handler
-func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Printf("Processing request data for request %s.\n", request.RequestContext.RequestID)
+func Handler() (string, error) {
 	db.UpdateMetricTable()
-	msg := "load  metric completed"
-	return events.APIGatewayProxyResponse{Body: msg, StatusCode: 200}, nil
+	return "load  metric completed", nil
 }
 
 func main() {

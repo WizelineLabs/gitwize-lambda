@@ -1,10 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
-	"github.com/aws/aws-lambda-go/events"
 	lbd "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -41,8 +38,6 @@ func triggerLambda(p interface{}, functionName string) {
 	}
 }
 
-// Ref: https://docs.aws.amazon.com/sdk-for-go/api/aws/
-// Ref: https://godoc.org/github.com/aws/aws-sdk-go/service/lambda#
 func updateAllRepos() {
 	conn := db.SQLDBConn()
 	defer conn.Close()
@@ -80,32 +75,10 @@ func updateAllRepos() {
 	log.Println("Completed trigger update ", count, "repositories")
 }
 
-// Response is of type APIGatewayProxyResponse since we're leveraging the
-// AWS Lambda Proxy Request functionality (default behavior)
-//
-// https://serverless.com/framework/docs/providers/aws/events/apigateway/#lambda-proxy-integration
-type Response events.APIGatewayProxyResponse
-
 // Handler is our lambda handler invoked by the `lambda.Start` function call
-func Handler(ctx context.Context) (Response, error) {
+func Handler() (string, error) {
 	updateAllRepos()
-
-	var buf bytes.Buffer
-	body, _ := json.Marshal(map[string]interface{}{
-		"message": "update all repositories completed",
-	})
-	json.HTMLEscape(&buf, body)
-
-	resp := Response{
-		StatusCode:      200,
-		IsBase64Encoded: false,
-		Body:            buf.String(),
-		Headers: map[string]string{
-			"Content-Type":           "application/json",
-			"X-MyCompany-Func-Reply": "update-all-repos-handler",
-		},
-	}
-	return resp, nil
+	return "update all repositories triggered", nil
 }
 
 func main() {
