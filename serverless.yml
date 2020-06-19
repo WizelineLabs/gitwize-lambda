@@ -74,24 +74,7 @@ functions:
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
       APP_STAGE: ${opt:stage}
     events:
-      - http:
-          path: update_all_repos
-          method: get
       - schedule: "cron(0 0/8 * * ? *)"
-  update_single:
-    handler: bin/update_single
-    memorySize: 1024
-    timeout: 900
-    environment:
-      DB_CONN_STRING: ${env:DB_CONN_STRING}
-      USE_DEFAULT_API_TOKEN: "TRUE"
-      DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
-      CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
-      APP_STAGE: ${opt:stage}
-    events:
-      - http:
-          path: update_single
-          method: get
   load_metrics:
     handler: bin/load_metrics
     memorySize: 1024
@@ -100,7 +83,4 @@ functions:
       DB_CONN_STRING: ${env:DB_CONN_STRING}
       APP_STAGE: ${opt:stage}
     events:
-      - http:
-          path: load_metric
-          method: get
       - schedule: "cron(20 0/8 * * ? *)"
