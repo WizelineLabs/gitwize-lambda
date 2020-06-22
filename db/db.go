@@ -13,7 +13,7 @@ func SQLDBConn() (db *sql.DB) {
 	dbConnDSN := os.Getenv("DB_CONN_STRING")
 	db, err := sql.Open("mysql", dbConnDSN)
 	if err != nil {
-		log.Fatalln("Failed to connect database", err)
+		log.Panicln("Failed to connect database", err)
 	}
 	return db
 }

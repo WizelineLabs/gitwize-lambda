@@ -29,11 +29,7 @@ func aes256Encrypt(data []byte, passphrase string) []byte {
 }
 
 func aes256Decrypt(data []byte, passphrase string) []byte {
-	key := createSHA256Hash(passphrase)
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		panic(err.Error())
-	}
+	block, _ := aes.NewCipher(createSHA256Hash(passphrase))
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		panic(err.Error())

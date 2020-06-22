@@ -14,7 +14,7 @@ func main() {
 	defer utils.TimeTrack(time.Now(), "Get Commit & PR Data All Repo")
 
 	fields := []string{"id", "name", "url", "password"}
-	repoRows := db.GetAllRepoRows(fields)
+	repoRows := db.NewCommonOps().GetAllRepoRows(fields)
 	if repoRows == nil {
 		log.Println("No repositories found")
 		return
@@ -62,6 +62,6 @@ func getDataOneRepo(c chan bool, id int, url, name, token string, conn *sql.DB) 
 	}()
 	gogit.UpdateDataForRepo(id, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), id, url, conn)
-	db.UpdateRepoLastUpdated(id)
+	db.NewCommonOps().UpdateRepoLastUpdated(id)
 	flag = true
 }

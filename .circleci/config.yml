@@ -3,7 +3,21 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+        environment:
+          - GO111MODULE=on
+          - MYSQL_USER=gitwize_user
+          - MYSQL_PASSWORD=P@ssword123
+      - image: mysql:5.7.22
+        environment:
+          - MYSQL_ALLOW_EMPTY_PASSWORD=true
+          - MYSQL_USER=gitwize_user
+          - MYSQL_DATABASE=gitwize
+          - MYSQL_PASSWORD=P@ssword123
+        command: |
+          --character-set-server="utf8"
+          --collation-server="utf8_general_ci"
+          --sql_mode=""
+    working_directory: /go/src/gitwize-lambda
     steps:
       - checkout
       - restore_cache:
@@ -14,31 +28,35 @@ jobs:
           key: go-mod-v1-{{ checksum "go.sum" }}
           paths:
             - "/go/pkg/mod"
-      - run: go test -count=1 ./...
       - run:
-          name: Code coverage
+          name: Checkout be repo to get init.sql
+          command: cd /tmp && git clone git@github.com:wizeline/gitwize-be.git && ls /tmp
+      - run:
+          name: Load init SQL # docker/init.sql
           command: |
-            go test -coverprofile=coverage.out ./...
-            go tool cover -html=coverage.out -o coverage.html
+           sudo bash -c "apt-get update && apt-get install -y default-mysql-client"
+           mysql -h 127.0.0.1 -P 3306 --protocol=tcp -u ${MYSQL_USER} -p${MYSQL_PASSWORD} </tmp/gitwize-be/docker/init.sql
+      - run: sudo apt install bc
+      - run: ./scripts/test_coverage.sh
       - run:
           name: "Run Sonarqube scanner"
           command: |
             export SCAN_VERSION=4.3.0.2102-linux
-            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCAN_VERSION}.zip 
-            unzip sonar-scanner-cli-${SCAN_VERSION}.zip 
+            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCAN_VERSION}.zip
+            unzip sonar-scanner-cli-${SCAN_VERSION}.zip
             ./sonar-scanner-${SCAN_VERSION}/bin/sonar-scanner \
              -Dsonar.projectKey=gitwize-lambda \
              -Dsonar.sources=. \
              -Dsonar.host.url=https://sunfyre.wizeline.com \
              -Dsonar.go.coverage.reportPaths=coverage.out \
-             -Dsonar.login=${SONARQUBE_TOKEN}      
+             -Dsonar.login=${SONARQUBE_TOKEN}
       - slack/status:
           fail_only: false
           webhook: '${SLACK_WEBHOOK}'
   deploy:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/gitwize-lambda
     steps:
       - checkout
       - restore_cache:
