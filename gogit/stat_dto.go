@@ -9,7 +9,8 @@ import (
 type commitDto struct {
 	RepositoryID int
 	Hash         string
-	Author       string
+	AuthorEmail  string
+	AuthorName   string
 	Message      string
 	NumFiles     int
 	AdditionLOC  int
@@ -26,7 +27,8 @@ type commitDto struct {
 type fileStatDTO struct {
 	RepositoryID int
 	Hash         string
-	Author       string
+	AuthorEmail  string
+	AuthorName   string
 	FileName     string
 	AdditionLOC  int
 	DeletionLOC  int
@@ -45,7 +47,8 @@ func (dto commitDto) getListValues() []interface{} {
 	return []interface{}{
 		dto.RepositoryID,
 		dto.Hash,
-		dto.Author,
+		dto.AuthorEmail,
+		dto.AuthorName,
 		dto.Message,
 		dto.NumFiles,
 		dto.AdditionLOC,
@@ -64,7 +67,8 @@ func (dto fileStatDTO) getListValues() []interface{} {
 	return []interface{}{
 		dto.RepositoryID,
 		dto.Hash,
-		dto.Author,
+		dto.AuthorEmail,
+		dto.AuthorName,
 		dto.FileName,
 		dto.AdditionLOC,
 		dto.DeletionLOC,
@@ -79,7 +83,8 @@ func (dto fileStatDTO) getListValues() []interface{} {
 func getCommitDTO(c *object.Commit) commitDto {
 	dto := commitDto{}
 	dto.Hash = c.Hash.String()
-	dto.Author = c.Author.Email
+	dto.AuthorEmail = c.Author.Email
+	dto.AuthorName = c.Author.Name
 	dto.Message = c.Message
 	dto.Year = c.Author.When.UTC().Year()
 	dto.Month = int(c.Author.When.UTC().Month())
@@ -124,7 +129,8 @@ func getFileStatDTO(c *object.Commit, rID int) []fileStatDTO {
 		dto := fileStatDTO{}
 		dto.RepositoryID = rID
 		dto.Hash = c.Hash.String()
-		dto.Author = c.Author.Email
+		dto.AuthorEmail = c.Author.Email
+		dto.AuthorName = c.Author.Name
 		dto.FileName = file.Name
 		dto.AdditionLOC = file.Addition
 		dto.DeletionLOC = file.Deletion

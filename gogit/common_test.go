@@ -19,7 +19,7 @@ func TestGetFullGitDateRange(t *testing.T) {
 }
 
 func TestGetCommitFields(t *testing.T) {
-	expectedFields := []string{"repository_id", "hash", "author_email", "message", "num_files", "addition_loc", "deletion_loc", "num_parents", "total_loc", "year", "month", "day", "hour", "commit_time_stamp"}
+	expectedFields := []string{"repository_id", "hash", "author_email", "author_name", "message", "num_files", "addition_loc", "deletion_loc", "num_parents", "total_loc", "year", "month", "day", "hour", "commit_time_stamp"}
 	expectedString := strings.Join(expectedFields, ",")
 	getFields := strings.Join(getCommitFields(), ",")
 	if expectedString != getFields {
@@ -28,7 +28,7 @@ func TestGetCommitFields(t *testing.T) {
 }
 
 func TestGetFileStatFields(t *testing.T) {
-	expectedFields := []string{"repository_id", "hash", "author_email", "file_name", "addition_loc", "deletion_loc", "year", "month", "day", "hour", "commit_time_stamp"}
+	expectedFields := []string{"repository_id", "hash", "author_email", "author_name", "file_name", "addition_loc", "deletion_loc", "year", "month", "day", "hour", "commit_time_stamp"}
 	expectedString := strings.Join(expectedFields, ",")
 	getFields := strings.Join(getFileStatFields(), ",")
 	if expectedString != getFields {
