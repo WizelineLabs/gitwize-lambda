@@ -6,10 +6,15 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
-
-      # specify any bash command here prefixed with `run: `
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run: go mod download
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run: go test -count=1 ./...
       - run:
           name: Code coverage
           command: |
@@ -26,7 +31,7 @@ jobs:
              -Dsonar.sources=. \
              -Dsonar.host.url=https://sunfyre.wizeline.com \
              -Dsonar.go.coverage.reportPaths=coverage.out \
-             -Dsonar.login=${SONARQUBE_TOKEN}
+             -Dsonar.login=${SONARQUBE_TOKEN}      
       - slack/status:
           fail_only: false
           webhook: '${SLACK_WEBHOOK}'
@@ -36,16 +41,21 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
-
-      # specify any bash command here prefixed with `run: `
-      - run: go get -v -t -d ./...
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run: go mod download
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
       - run: make
       - aws-cli/setup
       - serverless/setup:
           app-name: gitwize
           org-name: wizeline
       - run:
-          command: serverless deploy -v
+          command: ./scripts/deploy.sh
           name: deploy
       - slack/status:
           fail_only: false
@@ -66,4 +76,5 @@ workflows:
             branches:
               only:
                 - master
-                - /deploy-.*/
+            tags:
+              only: /^v[0-9]+(.[0-9]+)./
