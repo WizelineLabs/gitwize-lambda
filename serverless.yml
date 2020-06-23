@@ -50,7 +50,7 @@ package:
     - ./**
   include:
     - ./bin/**
-    - ./db/update_metric_table.sql
+    - ./db/sql/update_metric_table.sql
 
 functions:
   update_one_repo:

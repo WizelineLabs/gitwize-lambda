@@ -57,5 +57,4 @@ WHERE state = 'rejected'
 GROUP BY repository_id, closed_year, closed_month, closed_day, closed_hour
 ;
 
---Run
 CALL calculate_metric_open_pr_all_repos();
