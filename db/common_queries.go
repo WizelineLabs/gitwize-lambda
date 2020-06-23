@@ -45,7 +45,7 @@ func (t CommonOps) UpdateRepoLastUpdated(id int) {
 	}
 }
 
-// UpdateMetricTable execute db/update_metric_table.sql
+// UpdateMetricTable execute db/sql/update_metric_table.sql
 func UpdateMetricTable(sqlFile string) {
 	defer utils.TimeTrack(time.Now(), "UpdateMetricTable")
 

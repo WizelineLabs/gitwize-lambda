@@ -24,7 +24,7 @@ func TestUpdateMetricTable(t *testing.T) {
 				t.Errorf("Failed to update metric table")
 			}
 		}()
-		UpdateMetricTable("update_metric_table.sql")
+		UpdateMetricTable("sql/update_metric_table.sql")
 	}
 }
 

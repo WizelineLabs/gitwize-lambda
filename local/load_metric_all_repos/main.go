@@ -8,5 +8,5 @@ import (
 
 func main() {
 	defer utils.TimeTrack(time.Now(), "Load Metric All Repos")
-	db.UpdateMetricTable("db/update_metric_table.sql")
+	db.UpdateMetricTable("db/sql/update_metric_table.sql")
 }
