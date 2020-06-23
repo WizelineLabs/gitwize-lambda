@@ -9,20 +9,24 @@ import (
 	"log"
 )
 
-const durationLookBack = 3
+/*
+	For big repo such as `go` git@github.com:golang/go.git, it will not be able to load all data in one lambda
+	It'll need to refactor to multiple call, for example each call in a range 1000 commit.
+*/
 
 // Handler lambda function handler
 func Handler(e gogit.RepoPayload) (string, error) {
-	log.Println("Repo Event", e)
+	log.Println("Start loading full data for repo", e)
 	conn := db.SQLDBConn()
 	defer conn.Close()
 
-	dateRange := gogit.GetLastNDayDateRange(durationLookBack)
+	dateRange := gogit.GetFullGitDateRange()
 	token := utils.GetAccessToken(e.RepoPass)
 	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), e.RepoID, e.URL, conn)
+	db.UpdateMetricForRepo(e.RepoID)
 	db.NewCommonOps().UpdateRepoLastUpdated(e.RepoID)
-	resp := "Update Repo " + e.RepoName + " Completed"
+	resp := "Load full repo " + e.RepoName + " Completed"
 	return resp, nil
 }
 

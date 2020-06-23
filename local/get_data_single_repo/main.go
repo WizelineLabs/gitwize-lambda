@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const durationLookBack = 3
+
 func main() {
 	id, name, url := os.Args[1], os.Args[2], os.Args[3]
 	if id == "" || name == "" || url == "" {
@@ -27,7 +29,7 @@ func main() {
 	token := utils.GetAccessToken(password)
 	conn := db.SQLDBConn()
 	defer conn.Close()
-	gogit.UpdateDataForRepo(repoID, url, name, token, "", gogit.GetLastNDayDateRange(3), conn)
+	gogit.UpdateDataForRepo(repoID, url, name, token, "", gogit.GetLastNDayDateRange(durationLookBack), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), repoID, url, conn)
 	db.NewCommonOps().UpdateRepoLastUpdated(repoID)
 }
