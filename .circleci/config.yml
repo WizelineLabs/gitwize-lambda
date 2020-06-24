@@ -48,7 +48,7 @@ jobs:
              -Dsonar.projectKey=gitwize-lambda \
              -Dsonar.sources=. \
              -Dsonar.host.url=https://sunfyre.wizeline.com \
-             -Dsonar.go.coverage.reportPaths=coverage.out \
+             -Dsonar.go.coverage.reportPaths=cover.out \
              -Dsonar.login=${SONARQUBE_TOKEN}
       - slack/status:
           fail_only: false

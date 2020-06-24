@@ -56,3 +56,5 @@ FROM gitwize.pull_request
 WHERE state = 'rejected'
 GROUP BY repository_id, closed_year, closed_month, closed_day, closed_hour
 ;
+
+CALL calculate_metric_open_pr_all_repos();

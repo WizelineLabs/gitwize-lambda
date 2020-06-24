@@ -7,7 +7,7 @@ import (
 
 // Handler lambda function handler
 func Handler() (string, error) {
-	db.UpdateMetricTable("db/update_metric_table.sql")
+	db.UpdateMetricTable("db/sql/update_metric_table.sql")
 	return "load  metric completed", nil
 }
 
