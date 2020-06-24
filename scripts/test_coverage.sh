@@ -2,7 +2,14 @@
 
 export GITWIZE_INTEGRATION_TEST="TRUE"
 
-go test ./...  -coverprofile cover.out; go tool cover -func cover.out | grep -o '[^,]\+$' | grep total |  awk '{print substr($3, 1, length($3)-1)}' > percentage.txt
+go test ./...  -coverprofile cover.out
+ret=$?
+if [[ "${ret}" -gt 0 ]]
+then
+    exit 1
+fi
+
+go tool cover -func cover.out | grep -o '[^,]\+$' | grep total |  awk '{print substr($3, 1, length($3)-1)}' > percentage.txt
 
 percentage=$(cat percentage.txt)
 
