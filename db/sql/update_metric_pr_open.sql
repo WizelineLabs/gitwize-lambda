@@ -1,6 +1,8 @@
+USE gitwize;
+
 -- Calculate PR Open metric for repository
 DROP PROCEDURE IF EXISTS calculate_metric_open_pr;
-DELIMITER $$  
+DELIMITER $$
 CREATE PROCEDURE calculate_metric_open_pr(
    IN repositoryId INT
 )

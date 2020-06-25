@@ -36,6 +36,7 @@ jobs:
           command: |
            sudo bash -c "apt-get update && apt-get install -y default-mysql-client"
            mysql -h 127.0.0.1 -P 3306 --protocol=tcp -u ${MYSQL_USER} -p${MYSQL_PASSWORD} </tmp/gitwize-be/docker/init.sql
+           mysql -h 127.0.0.1 -P 3306 --protocol=tcp -u ${MYSQL_USER} -p${MYSQL_PASSWORD} <./db/sql/update_metric_pr_open.sql
       - run: sudo apt install bc
       - run: ./scripts/test_coverage.sh
       - run:
