@@ -50,12 +50,21 @@ package:
     - ./**
   include:
     - ./bin/**
-    - ./db/sql/update_metric_table.sql
 
 functions:
   update_one_repo:
     handler: bin/update_one_repo
     memorySize: 1024
+    timeout: 900
+    environment:
+      DB_CONN_STRING: ${env:DB_CONN_STRING}
+      USE_DEFAULT_API_TOKEN: "TRUE"
+      DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
+      CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
+      APP_STAGE: ${opt:stage}
+  load_full_one_repo:
+    handler: bin/load_full_one_repo
+    memorySize: 2048
     timeout: 900
     environment:
       DB_CONN_STRING: ${env:DB_CONN_STRING}

@@ -37,7 +37,6 @@ func (t lambdaClient) Trigger(payloadValues interface{}, funcName string, awsReg
 }
 
 type dbInterface interface {
-	UpdateRepoLastUpdated(id int)
 	GetAllRepoRows(fields []string) *sql.Rows
 }
 
@@ -70,7 +69,6 @@ func updateAllRepos(lbd awsLambda, awsRegion string, mydb dbInterface) {
 			if err != nil {
 				log.Println("ERR", err)
 			} else {
-				mydb.UpdateRepoLastUpdated(id)
 				count++
 			}
 		}
