@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func Test_GetDTOFromCommitObject(t *testing.T) {
+func TestGetDTOFromCommitObject(t *testing.T) {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: "https://github.com/sang-d/mock-repo.git",
 	})
@@ -17,6 +17,7 @@ func Test_GetDTOFromCommitObject(t *testing.T) {
 	}
 	expectedHash := "e15d6dad1576edf08811cb1b85a80c23b6d91153"
 	expectedEmail := "sang.dinh@wizeline.com"
+	expectedName := "Sang Dinh"
 
 	commit, _ := r.CommitObject(plumbing.NewHash(expectedHash))
 	dto := getCommitDTO(commit)
@@ -24,8 +25,11 @@ func Test_GetDTOFromCommitObject(t *testing.T) {
 	if dto.Hash != expectedHash {
 		t.Errorf("expected hash %s, got %s", expectedHash, dto.Hash)
 	}
-	if dto.Author != expectedEmail {
-		t.Errorf("expected author %s, got %s", expectedEmail, dto.Author)
+	if dto.AuthorEmail != expectedEmail {
+		t.Errorf("expected author email %s, got %s", expectedEmail, dto.AuthorEmail)
+	}
+	if dto.AuthorName != expectedName {
+		t.Errorf("expected author name %s, got %s", expectedName, dto.AuthorName)
 	}
 	if dto.NumParents != 1 {
 		t.Errorf("expected number parents %d, got %d", 1, dto.NumParents)
@@ -41,7 +45,7 @@ func Test_GetDTOFromCommitObject(t *testing.T) {
 	}
 }
 
-func Test_GetFileStatsFromCommitObject(t *testing.T) {
+func TestGetFileStatsFromCommitObject(t *testing.T) {
 	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: "https://github.com/sang-d/mock-repo.git",
 	})

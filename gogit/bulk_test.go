@@ -11,7 +11,8 @@ var fileFields = getFileStatFields()
 var cdto = commitDto{
 	RepositoryID: 1,
 	Hash:         "testhash",
-	Author:       "test@wizeline.com",
+	AuthorEmail:  "test@wizeline.com",
+	AuthorName:   "test-user",
 	Message:      "test message",
 	NumFiles:     10,
 	AdditionLOC:  100,
@@ -27,7 +28,8 @@ var cdto = commitDto{
 var fdto = fileStatDTO{
 	RepositoryID: 1,
 	Hash:         "testhash",
-	Author:       "test@wizeline.com",
+	AuthorEmail:  "test@wizeline.com",
+	AuthorName:   "test-user",
 	FileName:     "test_file.go",
 	AdditionLOC:  100,
 	DeletionLOC:  200,
@@ -38,7 +40,7 @@ var fdto = fileStatDTO{
 	TimeStamp:    "2019-08-04 01:50:31",
 }
 
-var expectedCommitStatement = "INSERT INTO mockCommitTable (repository_id, hash, author_email, message, num_files, addition_loc, deletion_loc, num_parents, total_loc, year, month, day, hour, commit_time_stamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE repository_id=repository_id"
+var expectedCommitStatement = "INSERT INTO mockCommitTable (repository_id, hash, author_email, author_name, message, num_files, addition_loc, deletion_loc, num_parents, total_loc, year, month, day, hour, commit_time_stamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE repository_id=repository_id"
 
 func TestGenerateSQLStatementForCommit(t *testing.T) {
 	dtos := []dtoInterface{
@@ -56,7 +58,7 @@ func TestGenerateSQLStatementForCommit(t *testing.T) {
 	}
 }
 
-var expectedFileStatement = "INSERT INTO mockFileTable (repository_id, hash, author_email, file_name, addition_loc, deletion_loc, year, month, day, hour, commit_time_stamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE repository_id=repository_id"
+var expectedFileStatement = "INSERT INTO mockFileTable (repository_id, hash, author_email, author_name, file_name, addition_loc, deletion_loc, year, month, day, hour, commit_time_stamp) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE repository_id=repository_id"
 
 func TestGenerateSQLStatementForFile(t *testing.T) {
 	dtos := []dtoInterface{
