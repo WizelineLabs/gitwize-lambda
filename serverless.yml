@@ -29,7 +29,6 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ap-southeast-1
 
-
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
     - Effect: "Allow"
@@ -62,6 +61,9 @@ functions:
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
       APP_STAGE: ${opt:stage}
+    layers:
+      - arn:aws:lambda:${self:provider.region}:553035198032:layer:git-lambda2:6
+
   load_full_one_repo:
     handler: bin/load_full_one_repo
     memorySize: 2048
@@ -72,6 +74,9 @@ functions:
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
       APP_STAGE: ${opt:stage}
+    layers:
+      - arn:aws:lambda:${self:provider.region}:553035198032:layer:git-lambda2:6
+
   update_all_repos:
     handler: bin/update_all_repos
     memorySize: 1024
@@ -84,6 +89,9 @@ functions:
       APP_STAGE: ${opt:stage}
     events:
       - schedule: "cron(0 0/8 * * ? *)"
+    layers:
+      - arn:aws:lambda:${self:provider.region}:553035198032:layer:git-lambda2:6
+
   load_metrics:
     handler: bin/load_metrics
     memorySize: 1024
@@ -93,3 +101,17 @@ functions:
       APP_STAGE: ${opt:stage}
     events:
       - schedule: "cron(20 0/8 * * ? *)"
+    layers:
+      - arn:aws:lambda:${self:provider.region}:553035198032:layer:git-lambda2:6
+
+  git_native_example:
+    handler: bin/git_native_example
+    memorySize: 128
+    timeout: 60
+    environment:
+      USE_DEFAULT_API_TOKEN: "TRUE"
+      DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
+      CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
+      APP_STAGE: ${opt:stage}
+    layers:
+      - arn:aws:lambda:${self:provider.region}:553035198032:layer:git-lambda2:6
