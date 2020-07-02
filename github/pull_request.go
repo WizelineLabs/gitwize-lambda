@@ -153,7 +153,7 @@ func insertPRs(prSvc PullRequestService, repoID int, prs []*github.PullRequest, 
 		state := "open"
 		if *pr.State == "closed" && pr.MergedAt != nil {
 			state = "merged"
-		} else if pr.State == nil {
+		} else if pr.MergedAt == nil {
 			state = "rejected"
 		}
 
