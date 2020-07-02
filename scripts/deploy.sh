@@ -10,7 +10,7 @@ if [[ ${APP_STAGE} == 'qa' ]]; then
     export CYPHER_PASS_PHASE=${CYPHER_PASS_PHASE_QA}
     export USE_DEFAULT_API_TOKEN=${USE_DEFAULT_API_TOKEN_QA}
     echo "deploy to QA"
-elif [[ ${APP_STAGE} == 'prod' ]]
+elif [[ ${APP_STAGE} == 'prod' ]]; then
     export DB_CONN_STRING=${DB_CONN_STRING_PROD}
     export DEFAULT_GITHUB_TOKEN=${DEFAULT_GITHUB_TOKEN_PROD}
     export CYPHER_PASS_PHASE=${CYPHER_PASS_PHASE_PROD}
