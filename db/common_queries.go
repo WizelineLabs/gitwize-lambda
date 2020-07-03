@@ -33,7 +33,7 @@ func (t CommonOps) GetAllRepoRows(fields []string) *sql.Rows {
 func (t CommonOps) UpdateRepoLastUpdated(id int) {
 	conn := SQLDBConn()
 	defer conn.Close()
-	query := "UPDATE repository SET ctl_last_metric_updated = ? WHERE id = ?"
+	query := "UPDATE repository SET ctl_last_metric_updated = ?, status = \"AVAILABLE\" WHERE id = ?"
 	stmt, err := conn.Prepare(query)
 	if err != nil {
 		log.Printf("[ERROR] %s", err)

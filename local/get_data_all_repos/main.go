@@ -13,7 +13,7 @@ import (
 func main() {
 	defer utils.TimeTrack(time.Now(), "Get Commit & PR Data All Repo")
 
-	fields := []string{"id", "name", "url", "password"}
+	fields := []string{"id", "name", "url", "access_token"}
 	repoRows := db.NewCommonOps().GetAllRepoRows(fields)
 	if repoRows == nil {
 		log.Println("No repositories found")
@@ -21,15 +21,15 @@ func main() {
 	}
 
 	var id int
-	var name, url, password string
+	var name, url, accessToken string
 
 	count := 0
 	conn := db.SQLDBConn()
 	defer conn.Close()
 	c := make(chan bool)
 	for repoRows.Next() {
-		err := repoRows.Scan(&id, &name, &url, &password)
-		token := utils.GetAccessToken(password)
+		err := repoRows.Scan(&id, &name, &url, &accessToken)
+		token := utils.GetAccessToken(accessToken)
 		if err != nil {
 			log.Println(err)
 		} else {

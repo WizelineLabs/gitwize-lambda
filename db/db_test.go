@@ -28,7 +28,7 @@ func TestUpdateMetricTable(t *testing.T) {
 
 func TestGetAllRepoRows(t *testing.T) {
 	if utils.IntegrationTestEnabled() {
-		fields := []string{"id", "name", "url", "password"}
+		fields := []string{"id", "name", "url", "access_token"}
 		rows := NewCommonOps().GetAllRepoRows(fields)
 		if rows == nil {
 			t.Error("No repo found, check init query loaded repo to mysql docker")

@@ -33,11 +33,11 @@ func GetLastNDayDateRange(n int) DateRange {
 
 // RepoPayload event for update one repo
 type RepoPayload struct {
-	RepoID   int    `json:"RepoID"`
-	URL      string `json:"URL"`
-	RepoName string `json:"RepoName"`
-	RepoPass string `json:"Password"`
-	Branch   string `json:"Branch"`
+	RepoID          int    `json:"RepoID"`
+	URL             string `json:"URL"`
+	RepoName        string `json:"RepoName"`
+	RepoAccessToken string `json:"RepoAccessToken"`
+	Branch          string `json:"Branch"`
 }
 
 func getCommitFields() []string {
