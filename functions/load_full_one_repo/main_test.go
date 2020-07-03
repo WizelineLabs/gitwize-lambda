@@ -12,7 +12,7 @@ func TestHandler(t *testing.T) {
 			RepoID:   1,
 			URL:      "https://github.com/sang-d/mock-repo",
 			RepoName: "mock-repo-one",
-			RepoPass: "",
+			RepoAccessToken: "",
 			Branch:   "",
 		}
 		_, err := Handler(payload)

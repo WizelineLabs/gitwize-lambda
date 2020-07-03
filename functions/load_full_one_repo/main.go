@@ -21,7 +21,7 @@ func Handler(e gogit.RepoPayload) (string, error) {
 	defer conn.Close()
 
 	dateRange := gogit.GetFullGitDateRange()
-	token := utils.GetAccessToken(e.RepoPass)
+	token := utils.GetAccessToken(e.RepoAccessToken)
 	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), e.RepoID, e.URL, conn)
 	db.UpdateMetricForRepo(e.RepoID)

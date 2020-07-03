@@ -41,11 +41,11 @@ type dbInterface interface {
 }
 
 func updateAllRepos(lbd awsLambda, awsRegion string, mydb dbInterface) {
-	fields := []string{"id", "name", "url", "password"}
+	fields := []string{"id", "name", "url", "access_token"}
 	rows := mydb.GetAllRepoRows(fields)
 
 	var id int
-	var name, url, password string
+	var name, url, accessToken string
 
 	if rows == nil {
 		log.Printf("[WARN] No repositories found")
@@ -54,16 +54,16 @@ func updateAllRepos(lbd awsLambda, awsRegion string, mydb dbInterface) {
 
 	count := 0
 	for rows.Next() {
-		err := rows.Scan(&id, &name, &url, &password)
+		err := rows.Scan(&id, &name, &url, &accessToken)
 		if err != nil {
 			log.Println("ERR", err)
 		} else {
 			payload := gogit.RepoPayload{
-				RepoID:   id,
-				URL:      url,
-				RepoName: name,
-				RepoPass: password,
-				Branch:   "",
+				RepoID:          id,
+				URL:             url,
+				RepoName:        name,
+				RepoAccessToken: accessToken,
+				Branch:          "",
 			}
 			err := lbd.Trigger(payload, utils.GetUpdateOneRepoFuncName(), awsRegion)
 			if err != nil {
