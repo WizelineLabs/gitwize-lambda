@@ -26,6 +26,7 @@ import (
 
 type PullRequestService interface {
 	List(owner string, repo string, opts *github.PullRequestListOptions) ([]*github.PullRequest, *github.Response, error)
+	Get(owner string, repo string, prNo int) (*github.PullRequest, *github.Response, error)
 }
 
 type GithubPullRequestService struct {
@@ -55,6 +56,10 @@ func newGithubClient(token string) *github.Client {
 
 func (s *GithubPullRequestService) List(owner string, repo string, opts *github.PullRequestListOptions) ([]*github.PullRequest, *github.Response, error) {
 	return s.githubClient.PullRequests.List(context.Background(), owner, repo, opts)
+}
+
+func (s *GithubPullRequestService) Get(owner string, repo string, prNo int) (*github.PullRequest, *github.Response, error) {
+	return s.githubClient.PullRequests.Get(context.Background(), owner, repo, prNo)
 }
 
 func CollectPRsOfRepo(prSvc PullRequestService, id int, url string, conn *sql.DB) {
@@ -126,7 +131,7 @@ func collectPRsOfRepo(prSvc PullRequestService, id int, owner string, repo strin
 				break
 			}
 		}
-		insertPRs(prSvc, id, filteredPrs, conn)
+		insertPRs(prSvc, id, owner, repo, filteredPrs, conn)
 
 		if stopFetching {
 			break
@@ -135,11 +140,11 @@ func collectPRsOfRepo(prSvc PullRequestService, id int, owner string, repo strin
 	}
 }
 
-func insertPRs(prSvc PullRequestService, repoID int, prs []*github.PullRequest, conn *sql.DB) {
+func insertPRs(prSvc PullRequestService, repoID int, owner string, repo string, prs []*github.PullRequest, conn *sql.DB) {
 	// Prepare statements
-	sql := `INSERT INTO pull_request (repository_id, url, pr_no, title, body, head, base, state, created_by, created_year, created_month, created_day, created_hour, closed_year, closed_month, closed_day, closed_hour)
-			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-			ON DUPLICATE KEY UPDATE state = ?, title = ?, body = ?, head = ?, base = ?, closed_year = ?, closed_month = ?, closed_day = ?, closed_hour = ?`
+	sql := `INSERT INTO pull_request (repository_id, url, pr_no, title, body, head, base, state, created_by, created_year, created_month, created_day, created_hour, closed_year, closed_month, closed_day, closed_hour, additions, deletions, review_duration)
+			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			ON DUPLICATE KEY UPDATE state = ?, title = ?, body = ?, head = ?, base = ?, closed_year = ?, closed_month = ?, closed_day = ?, closed_hour = ?, additions = ?, deletions = ?, review_duration = ?`
 	insertStmt, err := conn.Prepare(sql)
 
 	if err != nil {
@@ -157,22 +162,30 @@ func insertPRs(prSvc PullRequestService, repoID int, prs []*github.PullRequest, 
 			state = "rejected"
 		}
 
+		// get details
+		pr, _, err = prSvc.Get(owner, repo, *pr.Number)
+		if err != nil {
+			log.Printf("[ERROR] fetching PR details failed: %s", err)
+		}
+
 		created := pr.CreatedAt.UTC()
 		yearCreated := created.Year()
 		monthCreated := yearCreated*100 + int(created.Month())
 		dayCreated := monthCreated*100 + created.Day()
 		hourCreated := dayCreated*100 + created.Hour()
 		var yearClosed, monthClosed, dayClosed, hourClosed int
+		var reviewDuration int64
 		if pr.ClosedAt != nil {
 			yearClosed = pr.ClosedAt.Year()
 			monthClosed = yearClosed*100 + int(pr.ClosedAt.Month())
 			dayClosed = monthClosed*100 + pr.ClosedAt.Day()
 			hourClosed = dayClosed*100 + pr.ClosedAt.Hour()
+			reviewDuration = pr.ClosedAt.Unix() - pr.CreatedAt.Unix()
 		}
 		_, err := insertStmt.Exec(repoID, pr.HTMLURL, pr.Number, pr.Title, pr.Body, pr.Head.Ref, pr.Base.Ref, state, pr.User.Login,
 			yearCreated, monthCreated, dayCreated, hourCreated,
-			yearClosed, monthClosed, dayClosed, hourClosed,
-			state, pr.Title, pr.Body, pr.Head.Ref, pr.Base.Ref, yearClosed, monthClosed, dayClosed, hourClosed)
+			yearClosed, monthClosed, dayClosed, hourClosed, pr.Additions, pr.Deletions, reviewDuration,
+			state, pr.Title, pr.Body, pr.Head.Ref, pr.Base.Ref, yearClosed, monthClosed, dayClosed, hourClosed, pr.Additions, pr.Deletions, reviewDuration)
 
 		if err != nil {
 			log.Printf("[ERROR] %s", err)
