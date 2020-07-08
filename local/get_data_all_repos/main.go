@@ -26,7 +26,6 @@ func main() {
 	count := 0
 	conn := db.SQLDBConn()
 	defer conn.Close()
-	c := make(chan bool)
 	for repoRows.Next() {
 		err := repoRows.Scan(&id, &name, &url, &accessToken)
 		token := utils.GetAccessToken(accessToken)
@@ -34,34 +33,23 @@ func main() {
 			log.Println(err)
 		} else {
 			count++
-			go getDataOneRepo(c, id, url, name, token, conn)
+			getDataOneRepo(id, url, name, token, conn)
 		}
 	}
 
-	successCount, failCount := 0, 0
-	for i := 0; i < count; i++ {
-		if <-c {
-			successCount++
-		} else {
-			failCount++
-		}
-	}
-	log.Printf("Done. %d repo updated successfully. %d repo failed", successCount, failCount)
+	log.Printf("Done. %d repo updated successfully", count)
 
 }
 
-func getDataOneRepo(c chan bool, id int, url, name, token string, conn *sql.DB) {
-	flag := false
+func getDataOneRepo(id int, url, name, token string, conn *sql.DB) {
 	defer func() {
 		r := recover()
 		if r != nil {
 			log.Println("Recover: ", r)
 		}
-		c <- flag
 		return
 	}()
-	gogit.UpdateDataForRepo(id, url, name, token, "", gogit.GetLastNDayDateRange(360), conn)
+	gogit.UpdateDataForRepo(id, url, name, token, "", gogit.GetFullGitDateRange(), conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), id, url, conn)
 	db.NewCommonOps().UpdateRepoLastUpdated(id)
-	flag = true
 }
