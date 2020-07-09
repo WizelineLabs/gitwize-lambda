@@ -91,8 +91,8 @@ func getCommitDTO(c *object.Commit) commitDto {
 	dto.Day = c.Author.When.UTC().Day()
 	dto.Hour = c.Author.When.UTC().Hour()
 	dto.TimeStamp = c.Author.When.UTC().String()
-	dto.LOC = getLineOfCode(c)
-	// dto.LOC = 0 // temporary disable getting total loc, to impove perf
+	// dto.LOC = getLineOfCode(c)
+	dto.LOC = 0 //  disable getting total loc as this not used, need to remove go routine to avoid issue too many open file
 	fileStats, err := c.Stats()
 	if err != nil {
 		log.Panicln(err)
