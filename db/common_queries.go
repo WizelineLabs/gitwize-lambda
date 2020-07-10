@@ -94,19 +94,19 @@ GROUP BY repository_id, year, month, day, hour
 ;
 
 SET SQL_SAFE_UPDATES = 0;
-DELETE FROM metric WHERE branch='master' AND type=3;
+DELETE FROM metric WHERE branch='master' AND type=2;
 -- line added
 INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
-SELECT repository_id, 'master', 3, SUM(addition_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
+SELECT repository_id, 'master', 2, SUM(addition_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
 GROUP BY repository_id, year, month, day, hour
 ;
 
 SET SQL_SAFE_UPDATES = 0;
-DELETE FROM metric WHERE branch='master' AND type=2;
+DELETE FROM metric WHERE branch='master' AND type=3;
 -- line removed
 INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
-SELECT repository_id, 'master', 2, SUM(deletion_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
+SELECT repository_id, 'master', 3, SUM(deletion_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
 GROUP BY repository_id, year, month, day, hour
 ;
@@ -160,20 +160,20 @@ GROUP BY repository_id, year, month, day, hour
 ;
 
 SET SQL_SAFE_UPDATES = 0;
-DELETE FROM metric WHERE branch='master' AND type=3 AND repository_id=$repoID;
+DELETE FROM metric WHERE branch='master' AND type=2 AND repository_id=$repoID;
 -- line added
 INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
-SELECT repository_id, 'master', 3, SUM(addition_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
+SELECT repository_id, 'master', 2, SUM(addition_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
 WHERE repository_id=$repoID
 GROUP BY repository_id, year, month, day, hour
 ;
 
 SET SQL_SAFE_UPDATES = 0;
-DELETE FROM metric WHERE branch='master' AND type=2 AND repository_id=$repoID;
+DELETE FROM metric WHERE branch='master' AND type=3 AND repository_id=$repoID;
 -- line removed
 INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
-SELECT repository_id, 'master', 2, SUM(deletion_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
+SELECT repository_id, 'master', 3, SUM(deletion_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
 WHERE repository_id=$repoID
 GROUP BY repository_id, year, month, day, hour
