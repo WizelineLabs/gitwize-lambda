@@ -23,13 +23,13 @@ func UpdateDataForRepo(repoID int, repoURL, repoName, token, branch string, date
 	r := GetRepo(repoName, repoURL, token)
 	commitIter := GetCommitIterFromBranch(r, branch, dateRange)
 	updateCommitAndFileStatData(commitIter, repoID, conn)
-	updateFileStat(repoID, repoName)
+	updateFileStat(repoID, repoName, dateRange)
 }
 
-// TODO support time range
-func updateFileStat(repoId int, repoName string) {
+func updateFileStat(repoId int, repoName string, dateRange DateRange) {
+	layout := "2006-01-02"
 	vRepoPath := "/tmp/" + repoName
-	command := fmt.Sprintf("./scripts/filestat.sh %s %s", strconv.Itoa(repoId), vRepoPath)
+	command := fmt.Sprintf("./scripts/filestat.sh %s %s %s %s", strconv.Itoa(repoId), vRepoPath, dateRange.Since.Format(layout), dateRange.Until.Format(layout))
 	out, err := exec.Command("/bin/sh", "-c", command).Output()
 	if err != nil {
 		log.Printf("updateFileStat failed: %s", err)

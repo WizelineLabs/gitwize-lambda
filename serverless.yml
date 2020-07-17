@@ -49,6 +49,8 @@ package:
     - ./**
   include:
     - ./bin/**
+    - ./scripts/filestat.sh
+    - ./scripts/diffstat
 
 functions:
   update_one_repo:
@@ -64,6 +66,11 @@ functions:
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
       APP_STAGE: ${opt:stage}
+      GW_DB_HOST: ${env:GW_DB_HOST}
+      GW_DB_PASSWORD: ${env:GW_DB_PASSWORD}
+      GW_DB_USER: ${env:GW_DB_USER}
+      GW_DB_PORT: ${env:GW_DB_PORT}
+      GW_DB_NAME: ${env:GW_DB_NAME}
 
   load_full_one_repo:
     handler: bin/load_full_one_repo
@@ -78,6 +85,11 @@ functions:
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
       APP_STAGE: ${opt:stage}
+      GW_DB_HOST: ${env:GW_DB_HOST}
+      GW_DB_PASSWORD: ${env:GW_DB_PASSWORD}
+      GW_DB_USER: ${env:GW_DB_USER}
+      GW_DB_PORT: ${env:GW_DB_PORT}
+      GW_DB_NAME: ${env:GW_DB_NAME}
 
   update_all_repos:
     handler: bin/update_all_repos
@@ -92,6 +104,11 @@ functions:
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
       APP_STAGE: ${opt:stage}
+      GW_DB_HOST: ${env:GW_DB_HOST}
+      GW_DB_PASSWORD: ${env:GW_DB_PASSWORD}
+      GW_DB_USER: ${env:GW_DB_USER}
+      GW_DB_PORT: ${env:GW_DB_PORT}
+      GW_DB_NAME: ${env:GW_DB_NAME}
     events:
       - schedule: "cron(0 0/8 * * ? *)"
 
@@ -117,5 +134,10 @@ functions:
       DEFAULT_GITHUB_TOKEN: ${env:DEFAULT_GITHUB_TOKEN}
       CYPHER_PASS_PHASE: ${env:CYPHER_PASS_PHASE}
       APP_STAGE: ${opt:stage}
+      GW_DB_HOST: ${env:GW_DB_HOST}
+      GW_DB_PASSWORD: ${env:GW_DB_PASSWORD}
+      GW_DB_USER: ${env:GW_DB_USER}
+      GW_DB_PORT: ${env:GW_DB_PORT}
+      GW_DB_NAME: ${env:GW_DB_NAME}
     layers:
       - arn:aws:lambda:${self:provider.region}:553035198032:layer:git-lambda2:6
