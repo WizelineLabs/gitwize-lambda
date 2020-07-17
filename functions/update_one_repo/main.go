@@ -19,8 +19,8 @@ func Handler(e gogit.RepoPayload) (string, error) {
 
 	dateRange := gogit.GetLastNDayDateRange(durationLookBack)
 	token := utils.GetAccessToken(e.RepoAccessToken)
-	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), e.RepoID, e.URL, conn)
+	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	db.NewCommonOps().UpdateRepoLastUpdated(e.RepoID)
 	resp := "Update Repo " + e.RepoName + " Completed"
 	return resp, nil

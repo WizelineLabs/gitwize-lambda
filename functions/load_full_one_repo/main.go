@@ -22,8 +22,8 @@ func Handler(e gogit.RepoPayload) (string, error) {
 
 	dateRange := gogit.GetFullGitDateRange()
 	token := utils.GetAccessToken(e.RepoAccessToken)
-	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	github.CollectPRsOfRepo(github.NewGithubPullRequestService(token), e.RepoID, e.URL, conn)
+	gogit.UpdateDataForRepo(e.RepoID, e.URL, e.RepoName, token, e.Branch, dateRange, conn)
 	db.UpdateMetricForRepo(e.RepoID)
 	db.NewCommonOps().UpdateRepoLastUpdated(e.RepoID)
 	resp := "Load full repo " + e.RepoName + " Completed"

@@ -1,4 +1,32 @@
 version: 2.1
+
+commands:
+ deploy_build:
+  parameters:
+    environment:
+      type: string
+  steps:
+    - checkout
+    - restore_cache:
+        keys:
+          - go-mod-v1-{{ checksum "go.sum" }}
+    - run: go mod download
+    - save_cache:
+        key: go-mod-v1-{{ checksum "go.sum" }}
+        paths:
+          - "/go/pkg/mod"
+    - run: make
+    - aws-cli/setup
+    - serverless/setup:
+        app-name: gitwize
+        org-name: wizeline
+    - run:
+        command:  |
+          export APP_STAGE=<< parameters.environment >>
+          echo "APP_STAGE=${APP_STAGE}"
+          ./scripts/deploy.sh
+        name: deploy
+
 jobs:
   build:
     docker:
@@ -60,23 +88,28 @@ jobs:
       - image: circleci/golang:1.14
     working_directory: /go/src/gitwize-lambda
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - go-mod-v1-{{ checksum "go.sum" }}
-      - run: go mod download
-      - save_cache:
-          key: go-mod-v1-{{ checksum "go.sum" }}
-          paths:
-            - "/go/pkg/mod"
-      - run: make
-      - aws-cli/setup
-      - serverless/setup:
-          app-name: gitwize
-          org-name: wizeline
-      - run:
-          command: ./scripts/deploy.sh
-          name: deploy
+      - deploy_build:
+          environment: dev
+      - slack/status:
+          fail_only: false
+          webhook: '${SLACK_WEBHOOK}'
+  deploy-qa:
+    docker:
+      - image: circleci/golang:1.14
+    working_directory: /go/src/gitwize-lambda
+    steps:
+      - deploy_build:
+          environment: qa
+      - slack/status:
+          fail_only: false
+          webhook: '${SLACK_WEBHOOK}'
+  deploy-prod:
+    docker:
+      - image: circleci/golang:1.14
+    working_directory: /go/src/gitwize-lambda
+    steps:
+      - deploy_build:
+          environment: prod
       - slack/status:
           fail_only: false
           webhook: '${SLACK_WEBHOOK}'
@@ -98,3 +131,26 @@ workflows:
                 - master
             tags:
               only: /^v[0-9]+(.[0-9]+)./
+      - deploy-qa:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+(\.[0-9]+).*/
+      - approval-deploy-prod: 
+          type: approval 
+          requires:
+            - deploy-qa
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+(\.[0-9]+).*/
+      - deploy-prod:
+          requires:
+            - approval-deploy-prod
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+(\.[0-9]+).*/
