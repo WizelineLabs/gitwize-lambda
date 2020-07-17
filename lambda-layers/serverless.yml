@@ -5,5 +5,6 @@ provider:
 
 layers:
   mysql_8_0_18_layer:
-    path: mysql_8_0_18_layer
+    package:
+      artifact: mysql-8.0.18-layer.zip
     description: Lambda layer for mysql command line 
