@@ -4,6 +4,7 @@ import (
 	"gitwize-lambda/cypher"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -51,4 +52,15 @@ func IntegrationTestEnabled() bool {
 		os.Setenv("USE_DEFAULT_API_TOKEN", "True")
 	}
 	return enabled == "TRUE"
+}
+
+// ExecuteCommand execute command and get output
+func ExecuteCommand(path string, command string, args ...string) ([]byte, error) {
+	cmd := exec.Command(command, args...)
+	cmd.Dir = path
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
