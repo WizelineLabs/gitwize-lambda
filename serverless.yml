@@ -54,6 +54,8 @@ package:
 functions:
   update_one_repo:
     handler: bin/update_one_repo
+    layers:
+      - arn:aws:lambda:ap-southeast-1:863257328258:layer:mysql_8_0_18_layer:1
     memorySize: 1024
     timeout: 900
     environment:
@@ -64,6 +66,8 @@ functions:
       APP_STAGE: ${opt:stage}
   load_full_one_repo:
     handler: bin/load_full_one_repo
+    layers:
+      - arn:aws:lambda:ap-southeast-1:863257328258:layer:mysql_8_0_18_layer:1
     memorySize: 2048
     timeout: 900
     environment:
@@ -74,6 +78,8 @@ functions:
       APP_STAGE: ${opt:stage}
   update_all_repos:
     handler: bin/update_all_repos
+    layers:
+      - arn:aws:lambda:ap-southeast-1:863257328258:layer:mysql_8_0_18_layer:1
     memorySize: 1024
     timeout: 900
     environment:
@@ -86,6 +92,8 @@ functions:
       - schedule: "cron(0 0/8 * * ? *)"
   load_metrics:
     handler: bin/load_metrics
+    layers:
+      - arn:aws:lambda:ap-southeast-1:863257328258:layer:mysql_8_0_18_layer:1
     memorySize: 1024
     timeout: 900
     environment:

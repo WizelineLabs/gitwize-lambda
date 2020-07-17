@@ -1,0 +1,9 @@
+service: gitwize-lambda-layers
+
+provider:
+  name: aws
+
+layers:
+  mysql_8_0_18_layer:
+    path: mysql_8_0_18_layer
+    description: Lambda layer for mysql command line 
