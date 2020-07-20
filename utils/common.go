@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -63,4 +64,24 @@ func ExecuteCommand(path string, command string, args ...string) ([]byte, error)
 		return nil, err
 	}
 	return out, nil
+}
+
+// SetDBConnSingleComponent set component of db conn string variables
+func SetDBConnSingleComponent() {
+	dbConnString := os.Getenv("DB_CONN_STRING")
+
+	dbUser, remain := dbConnString[:strings.Index(dbConnString, ":")], dbConnString[strings.Index(dbConnString, ":")+1:]
+	os.Setenv("GW_DB_USER", dbUser)
+
+	dbPassword, remain := remain[:strings.LastIndex(remain, "@(")], remain[strings.LastIndex(remain, "@(")+2:]
+	os.Setenv("GW_DB_PASSWORD", dbPassword)
+
+	dbHost, remain := remain[:strings.Index(remain, ":")], remain[strings.Index(remain, ":")+1:]
+	os.Setenv("GW_DB_HOST", dbHost)
+
+	dbPort, remain := remain[:strings.Index(remain, ")/")], remain[strings.Index(remain, ")/")+2:]
+	os.Setenv("GW_DB_PORT", dbPort)
+
+	dbName := strings.Split(remain, "?")[0]
+	os.Setenv("GW_DB_NAME", dbName)
 }

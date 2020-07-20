@@ -27,6 +27,7 @@ func UpdateDataForRepo(repoID int, repoURL, repoName, token, branch string, date
 }
 
 func updateFileStat(repoId int, repoName string, dateRange DateRange) {
+	utils.SetDBConnSingleComponent()
 	layout := "2006-01-02"
 	vRepoPath := "/tmp/" + repoName
 	command := fmt.Sprintf("./scripts/filestat.sh %s %s %s %s", strconv.Itoa(repoId), vRepoPath, dateRange.Since.Format(layout), dateRange.Until.Format(layout))
