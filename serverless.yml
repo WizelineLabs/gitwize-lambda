@@ -49,6 +49,8 @@ package:
     - ./**
   include:
     - ./bin/**
+    - ./scripts/filestat.sh
+    - ./scripts/diffstat
 
 functions:
   update_one_repo:

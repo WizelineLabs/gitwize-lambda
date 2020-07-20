@@ -2,10 +2,14 @@ package gogit
 
 import (
 	"database/sql"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	"fmt"
 	"gitwize-lambda/utils"
 	"log"
+	"os/exec"
+	"strconv"
 	"time"
+
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type CommitData struct {
@@ -19,6 +23,20 @@ func UpdateDataForRepo(repoID int, repoURL, repoName, token, branch string, date
 	r := GetRepo(repoName, repoURL, token)
 	commitIter := GetCommitIterFromBranch(r, branch, dateRange)
 	updateCommitAndFileStatData(commitIter, repoID, conn)
+	updateFileStat(repoID, repoName, dateRange)
+}
+
+func updateFileStat(repoId int, repoName string, dateRange DateRange) {
+	utils.SetDBConnSingleComponent()
+	layout := "2006-01-02"
+	vRepoPath := "/tmp/" + repoName
+	command := fmt.Sprintf("./scripts/filestat.sh %s %s %s %s", strconv.Itoa(repoId), vRepoPath, dateRange.Since.Format(layout), dateRange.Until.Format(layout))
+	out, err := exec.Command("/bin/sh", "-c", command).Output()
+	if err != nil {
+		log.Printf("updateFileStat failed: %s", err)
+	}
+	output := string(out[:])
+	log.Println(output)
 }
 
 func processCommit(repoID int, c *object.Commit, ch chan CommitData) {
