@@ -1,7 +1,6 @@
 package gogit
 
 import (
-	"strings"
 	"testing"
 	"time"
 )
@@ -18,20 +17,10 @@ func TestGetFullGitDateRange(t *testing.T) {
 	}
 }
 
-func TestGetCommitFields(t *testing.T) {
-	expectedFields := []string{"repository_id", "hash", "author_email", "author_name", "message", "num_files", "addition_loc", "deletion_loc", "num_parents", "total_loc", "year", "month", "day", "hour", "commit_time_stamp"}
-	expectedString := strings.Join(expectedFields, ",")
-	getFields := strings.Join(getCommitFields(), ",")
-	if expectedString != getFields {
-		t.Errorf("expected: %s, got: %s", expectedString, getFields)
-	}
-}
-
-func TestGetFileStatFields(t *testing.T) {
-	expectedFields := []string{"repository_id", "hash", "author_email", "author_name", "file_name", "addition_loc", "deletion_loc", "year", "month", "day", "hour", "commit_time_stamp"}
-	expectedString := strings.Join(expectedFields, ",")
-	getFields := strings.Join(getFileStatFields(), ",")
-	if expectedString != getFields {
-		t.Errorf("expected: %s, got: %s", expectedString, getFields)
+func TestGetRepoPath(t *testing.T) {
+	repoName := "mock-repo"
+	expectedPath := "/tmp/mock-repo"
+	if expectedPath != getRepoPath(repoName) {
+		t.Errorf("expected: %s, got: %s", expectedPath, getRepoPath(repoName))
 	}
 }

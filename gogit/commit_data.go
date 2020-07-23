@@ -3,13 +3,13 @@ package gogit
 import (
 	"database/sql"
 	"fmt"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	"gitwize-lambda/gitnative"
 	"gitwize-lambda/utils"
 	"log"
 	"os/exec"
 	"strconv"
 	"time"
-
-	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type CommitData struct {
@@ -22,15 +22,15 @@ func UpdateDataForRepo(repoID int, repoURL, repoName, token, branch string, date
 	defer utils.TimeTrack(time.Now(), "UpdateDataForRepo "+repoName)
 	r := GetRepo(repoName, repoURL, token)
 	commitIter := GetCommitIterFromBranch(r, branch, dateRange)
-	updateCommitAndFileStatData(commitIter, repoID, conn)
+	updateCommitAndFileStatData(commitIter, repoID, repoName, conn)
 	updateFileStat(repoID, repoName, dateRange)
 }
 
-func updateFileStat(repoId int, repoName string, dateRange DateRange) {
+func updateFileStat(repoID int, repoName string, dateRange DateRange) {
 	utils.SetDBConnSingleComponent()
 	layout := "2006-01-02"
-	vRepoPath := "/tmp/" + repoName
-	command := fmt.Sprintf("./scripts/filestat.sh %s %s %s %s", strconv.Itoa(repoId), vRepoPath, dateRange.Since.Format(layout), dateRange.Until.Format(layout))
+	vRepoPath := getRepoPath(repoName)
+	command := fmt.Sprintf("./scripts/filestat.sh %s %s %s %s", strconv.Itoa(repoID), vRepoPath, dateRange.Since.Format(layout), dateRange.Until.Format(layout))
 	out, err := exec.Command("/bin/sh", "-c", command).Output()
 	if err != nil {
 		log.Printf("updateFileStat failed: %s", err)
@@ -39,8 +39,9 @@ func updateFileStat(repoId int, repoName string, dateRange DateRange) {
 	log.Println(output)
 }
 
-func processCommit(repoID int, c *object.Commit, ch chan CommitData) {
+func processCommit(repoID int, repoName string, c *object.Commit, ch chan CommitData) {
 	cdto := getCommitDTO(c)
+	updateInsertionPoint(&cdto, repoName)
 	cdto.RepositoryID = repoID
 	fdtos := getFileStatDTO(c, repoID)
 	data := CommitData{
@@ -51,9 +52,16 @@ func processCommit(repoID int, c *object.Commit, ch chan CommitData) {
 	return
 }
 
-func iterateCommits(repoID int, commitIter object.CommitIter, ch chan CommitData) (counter int) {
+func updateInsertionPoint(cdto *commitDto, repoName string) {
+	insertionPoint, err := gitnative.GetInsertionPoint(getRepoPath(repoName), cdto.Hash)
+	if err == nil {
+		cdto.InsertionPoint = insertionPoint
+	}
+}
+
+func iterateCommits(repoID int, repoName string, commitIter object.CommitIter, ch chan CommitData) (counter int) {
 	err := commitIter.ForEach(func(c *object.Commit) error {
-		go processCommit(repoID, c, ch)
+		go processCommit(repoID, repoName, c, ch)
 		counter++
 		return nil
 	})
@@ -63,9 +71,9 @@ func iterateCommits(repoID int, commitIter object.CommitIter, ch chan CommitData
 	return counter
 }
 
-func updateCommitAndFileStatData(commitIter object.CommitIter, repoID int, conn *sql.DB) {
+func updateCommitAndFileStatData(commitIter object.CommitIter, repoID int, repoName string, conn *sql.DB) {
 	ch := make(chan CommitData)
-	counter := iterateCommits(repoID, commitIter, ch)
+	counter := iterateCommits(repoID, repoName, commitIter, ch)
 	log.Println("Number go routine created", counter)
 	cdtos := []dtoInterface{}
 	fdtos := []dtoInterface{}
@@ -75,11 +83,11 @@ func updateCommitAndFileStatData(commitIter object.CommitIter, repoID int, conn 
 		newFDtos := convertFileDtosToDtoInterfaces(data.fdtos)
 		fdtos = append(fdtos, newFDtos...)
 		if len(cdtos) >= batchSize || i == counter-1 {
-			executeBulkStatement(commitTable, getCommitFields(), cdtos, conn)
+			executeBulkStatement(commitTable, cdtos, conn)
 			cdtos = []dtoInterface{}
 		}
 		if len(fdtos) >= batchSize || i == counter-1 {
-			executeBulkStatement(fileStatTable, getFileStatFields(), fdtos, conn)
+			executeBulkStatement(fileStatTable, fdtos, conn)
 			fdtos = []dtoInterface{}
 		}
 	}

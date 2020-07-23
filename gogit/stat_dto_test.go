@@ -5,16 +5,17 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/storage/memory"
+	"github.com/stretchr/testify/assert"
+	"os"
+	"strings"
 	"testing"
 )
 
 func TestGetDTOFromCommitObject(t *testing.T) {
-	r, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
-		URL: "https://github.com/sang-d/mock-repo.git",
-	})
-	if err != nil {
-		panic(err.Error())
-	}
+	repoPath := tmpDirectory + "/" + repoName
+	os.RemoveAll(repoPath)
+	r := GetRepo("mock-repo", "https://github.com/sang-d/mock-repo.git", os.Getenv("DEFAULT_GITHUB_TOKEN"))
+
 	expectedHash := "e15d6dad1576edf08811cb1b85a80c23b6d91153"
 	expectedEmail := "sang.dinh@wizeline.com"
 	expectedName := "Sang Dinh"
@@ -73,4 +74,18 @@ func TestGetFileStatsFromCommitObject(t *testing.T) {
 	if dto.DeletionLOC != 0 {
 		t.Errorf("expected deletion loc %d, got %d", 0, dto.DeletionLOC)
 	}
+}
+
+func TestGetFieldNames(t *testing.T) {
+	commitDtoItem := commitDto{}
+	fileDtoItem := fileStatDTO{}
+
+	expectedCommitDtoNames := "repository_id,hash,author_email,author_name,message,num_files,addition_loc,deletion_loc,num_parents,insertion_point,total_loc,year,month,day,hour,commit_time_stamp"
+	assert.Equal(t, expectedCommitDtoNames, strings.Join(getFieldNames(commitDtoItem), ","))
+	assert.Equal(t, expectedCommitDtoNames, strings.Join(commitDtoItem.getFieldNames(), ","))
+
+	expectedFileStatNames := "repository_id,hash,author_email,author_name,file_name,addition_loc,deletion_loc,year,month,day,hour,commit_time_stamp"
+	assert.Equal(t, expectedFileStatNames, strings.Join(getFieldNames(fileDtoItem), ","))
+	assert.Equal(t, expectedFileStatNames, strings.Join(fileDtoItem.getFieldNames(), ","))
+
 }

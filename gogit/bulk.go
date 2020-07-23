@@ -6,7 +6,8 @@ import (
 	"strings"
 )
 
-func generateSQLStatement(table string, fields []string, dtos []dtoInterface) (string, []interface{}) {
+func generateSQLStatement(table string, dtos []dtoInterface) (string, []interface{}) {
+	fields := dtos[0].getFieldNames()
 	statement := "INSERT INTO " + table + " (" + strings.Join(fields, ", ") + ") "
 	values := make([]string, len(dtos))
 	valArgs := []interface{}{}
@@ -19,8 +20,8 @@ func generateSQLStatement(table string, fields []string, dtos []dtoInterface) (s
 	return statement, valArgs
 }
 
-func executeBulkStatement(table string, fields []string, dtos []dtoInterface, conn *sql.DB) {
-	statement, valArgs := generateSQLStatement(table, fields, dtos)
+func executeBulkStatement(table string, dtos []dtoInterface, conn *sql.DB) {
+	statement, valArgs := generateSQLStatement(table, dtos)
 	_, err := conn.Exec(statement, valArgs...)
 	if err != nil {
 		log.Panicln(err.Error())
