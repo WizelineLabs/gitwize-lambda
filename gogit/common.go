@@ -40,10 +40,6 @@ type RepoPayload struct {
 	Branch          string `json:"Branch"`
 }
 
-func getCommitFields() []string {
-	return []string{"repository_id", "hash", "author_email", "author_name", "message", "num_files", "addition_loc", "deletion_loc", "num_parents", "total_loc", "year", "month", "day", "hour", "commit_time_stamp"}
-}
-
-func getFileStatFields() []string {
-	return []string{"repository_id", "hash", "author_email", "author_name", "file_name", "addition_loc", "deletion_loc", "year", "month", "day", "hour", "commit_time_stamp"}
+func getRepoPath(repoName string) string {
+	return tmpDirectory + "/" + repoName
 }

@@ -3,44 +3,64 @@ package gogit
 import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"log"
+	"reflect"
 )
 
 // commitDto data object for commit entity
 type commitDto struct {
-	RepositoryID int
-	Hash         string
-	AuthorEmail  string
-	AuthorName   string
-	Message      string
-	NumFiles     int
-	AdditionLOC  int
-	DeletionLOC  int
-	NumParents   int
-	LOC          int
-	Year         int
-	Month        int
-	Day          int
-	Hour         int
-	TimeStamp    string
+	RepositoryID   int    `json:"repository_id"`
+	Hash           string `json:"hash"`
+	AuthorEmail    string `json:"author_email"`
+	AuthorName     string `json:"author_name"`
+	Message        string `json:"message"`
+	NumFiles       int    `json:"num_files"`
+	AdditionLOC    int    `json:"addition_loc"`
+	DeletionLOC    int    `json:"deletion_loc"`
+	NumParents     int    `json:"num_parents"`
+	InsertionPoint int    `json:"insertion_point"`
+	LOC            int    `json:"total_loc"`
+	Year           int    `json:"year"`
+	Month          int    `json:"month"`
+	Day            int    `json:"day"`
+	Hour           int    `json:"hour"`
+	TimeStamp      string `json:"commit_time_stamp"`
 }
 
 type fileStatDTO struct {
-	RepositoryID int
-	Hash         string
-	AuthorEmail  string
-	AuthorName   string
-	FileName     string
-	AdditionLOC  int
-	DeletionLOC  int
-	Year         int
-	Month        int
-	Day          int
-	Hour         int
-	TimeStamp    string
+	RepositoryID int    `json:"repository_id"`
+	Hash         string `json:"hash"`
+	AuthorEmail  string `json:"author_email"`
+	AuthorName   string `json:"author_name"`
+	FileName     string `json:"file_name"`
+	AdditionLOC  int    `json:"addition_loc"`
+	DeletionLOC  int    `json:"deletion_loc"`
+	Year         int    `json:"year"`
+	Month        int    `json:"month"`
+	Day          int    `json:"day"`
+	Hour         int    `json:"hour"`
+	TimeStamp    string `json:"commit_time_stamp"`
 }
 
 type dtoInterface interface {
 	getListValues() []interface{}
+	getFieldNames() []string
+}
+
+func getFieldNames(item interface{}) []string {
+	val := reflect.ValueOf(item)
+	names := make([]string, val.Type().NumField())
+	for i := 0; i < len(names); i++ {
+		names[i] = val.Type().Field(i).Tag.Get("json")
+	}
+	return names
+}
+
+func (dto commitDto) getFieldNames() []string {
+	return getFieldNames(dto)
+}
+
+func (fdto fileStatDTO) getFieldNames() []string {
+	return getFieldNames(fdto)
 }
 
 func (dto commitDto) getListValues() []interface{} {
@@ -54,6 +74,7 @@ func (dto commitDto) getListValues() []interface{} {
 		dto.AdditionLOC,
 		dto.DeletionLOC,
 		dto.NumParents,
+		dto.InsertionPoint,
 		dto.LOC,
 		dto.Year,
 		dto.Month,
