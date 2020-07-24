@@ -8,3 +8,8 @@ layers:
     package:
       artifact: mysql-8.0.18-layer.zip
     description: Lambda layer for mysql command line 
+
+  sonar_scanner_4_layer:
+    package:
+      artifact: sonar_scanner_4_layer.zip
+    description: For scanning source to Sonarqube server
