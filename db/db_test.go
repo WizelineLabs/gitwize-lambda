@@ -44,7 +44,7 @@ DELETE FROM metric WHERE branch='master' AND type=4;
 INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
 SELECT repository_id, 'master', 4, COUNT(*), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
-WHERE num_parents=1
+WHERE num_parents<2
 GROUP BY repository_id, year, month, day, hour
 ;
 
@@ -54,7 +54,7 @@ DELETE FROM metric WHERE branch='master' AND type=2;
 INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
 SELECT repository_id, 'master', 2, SUM(addition_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
-WHERE num_parents=1
+WHERE num_parents<2
 GROUP BY repository_id, year, month, day, hour
 ;
 
@@ -64,7 +64,7 @@ DELETE FROM metric WHERE branch='master' AND type=3;
 INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
 SELECT repository_id, 'master', 3, SUM(deletion_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
-WHERE num_parents=1
+WHERE num_parents<2
 GROUP BY repository_id, year, month, day, hour
 ;
 
@@ -116,7 +116,7 @@ INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
 SELECT repository_id, 'master', 4, COUNT(*), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
 WHERE repository_id=$repoID
-AND num_parents=1
+AND num_parents<2
 GROUP BY repository_id, year, month, day, hour
 ;
 
@@ -127,7 +127,7 @@ INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
 SELECT repository_id, 'master', 2, SUM(addition_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
 WHERE repository_id=$repoID
-AND num_parents=1
+AND num_parents<2
 GROUP BY repository_id, year, month, day, hour
 ;
 
@@ -138,7 +138,7 @@ INSERT INTO metric (repository_id, branch, type, value, year, month, day, hour)
 SELECT repository_id, 'master', 3, SUM(deletion_loc), year, year*100+month, (year*100+month)*100+day, (year*10000+month*100+day)*100+hour
 FROM commit_data
 WHERE repository_id=$repoID
-AND num_parents=1
+AND num_parents<2
 GROUP BY repository_id, year, month, day, hour
 ;
 

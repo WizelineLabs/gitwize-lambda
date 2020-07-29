@@ -44,7 +44,7 @@ func processCommit(repoID int, repoName string, c *object.Commit, ch chan Commit
 	updateInsertionPoint(&cdto, repoName)
 	cdto.RepositoryID = repoID
 	fdtos := []fileStatDTO{}
-	if cdto.NumParents == 1 {
+	if cdto.NumParents < 2 {
 		fdtos = getFileStatDTO(c, repoID)
 	}
 	data := CommitData{
