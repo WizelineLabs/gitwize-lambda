@@ -8,7 +8,7 @@
 # `Refactoring` - otherwise
 #
 # Run:
-#   ./filestat.sh <hash>
+#   ./filestat.sh <repo_id> <repo_path>
 # Output:
 #     Data will be persisted to `file_stat_data` table according to setting of below vars:
 #    - GW_DB_HOST
@@ -134,7 +134,7 @@ function filestat_single_commit() {
 
 # Calculates metrics for every file in every commit of a repo
 # `filestat <repo_ID> <repo_path>`
-functison filestat() {
+function filestat() {
     vRepo=$1
     vRepoPath=$2
     vFromDate=$3
