@@ -78,7 +78,8 @@ function last_editted_time_before_commit() {
 # `list_file_changed <commit_hash>`
 function list_file_changed() {
     vCommit=$1
-    git show $vCommit --numstat --pretty=oneline | sed -n '2,$'p | awk '{ print $3 }'
+    git show $vCommit --numstat --pretty=oneline | sed -n '2,$'p | awk '{ print $3 }' |
+        awk '!/.*.json/ { print }' # ignore *lock.json
 }
 
 # Calculates metrics for a single file in a commit
@@ -152,10 +153,13 @@ function filestat() {
 
     echo "Updating file_stat_data for repo=$vRepo within range [$vFromDate - $vToDate]"
     cd $vRepoPath
+
+    commit_cnt=0
     eval "git log --pretty=format:'%H|%ae|%an|%ad' --date=unix --no-merges $vRange" |
         (
             value_arr=()
             while IFS="|" read vHash vEmail vName vTimestamp; do
+                commit_cnt=$(($commit_cnt+1))
                 vCommit=$vHash
                 log_debug "Running stats for commit: filestat_single_commit $vCommit"
                 filestats=$(filestat_single_commit $vCommit)
@@ -167,20 +171,29 @@ function filestat() {
                 while IFS="," read vHash vFilename vAdditions vDeletions vModifications vChurn vRefactoring; do
                     value_arr+=("($vRepo,'$vHash','$vEmail','$vName','$vFilename',$vAdditions,$vDeletions,$vModifications,$vChurn,$vRefactoring,YEAR($vParsedDate),MONTH($vParsedDate),DAY($vParsedDate),HOUR($vParsedDate),$vParsedDate)")
                 done <<<"$filestats"
+
+                if [ "$commit_cnt" -eq 10 ]; then
+                    insert_data
+                    commit_cnt=0
+                fi
+                
             done
+        )
+}
 
-            # join SQL insert values
-            values=$(
-                IFS=","
-                echo "${value_arr[*]}"
-            )
+function insert_data() {
+    # join SQL insert values
+    values=$(
+        IFS=","
+        echo "${value_arr[*]}"
+    )
 
-            if [[ -z "$values" ]]; then
-                echo "No commits found. Do nothing!"
-                exit 0
-            fi
+    if [[ -z "$values" ]]; then
+        echo "No commits found. Do nothing!"
+        exit 0
+    fi
 
-            sql="INSERT INTO $GW_DB_NAME.file_stat_data (repository_id, hash, author_email, author_name,
+    sql="INSERT INTO $GW_DB_NAME.file_stat_data (repository_id, hash, author_email, author_name,
                 file_name, addition_loc, deletion_loc, modification_loc, churn_cnt, refactoring_cnt, year, month, day, hour, commit_time_stamp)
             VALUES $values
             ON DUPLICATE KEY UPDATE addition_loc=VALUES(addition_loc),
@@ -189,10 +202,9 @@ function filestat() {
                 churn_cnt=VALUES(churn_cnt),
                 refactoring_cnt=VALUES(refactoring_cnt)"
 
-            log_debug "Executing SQL: $sql"
-            # # Note for local: make sure mysql is on $PATH, aliases not working in non-interactive shells
-            mysql -h$GW_DB_HOST -P$GW_DB_PORT -u$GW_DB_USER -p$GW_DB_PASSWORD -e "$sql"
-        )
+    echo "Executing SQL: $sql"
+    # # Note for local: make sure mysql is on $PATH, aliases not working in non-interactive shells
+    mysql -h$GW_DB_HOST -P$GW_DB_PORT -u$GW_DB_USER -p$GW_DB_PASSWORD -e "$sql"
 }
 
 filestat $1 $2 $3 $4
