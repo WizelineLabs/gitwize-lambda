@@ -95,7 +95,7 @@ function filestat_single_file() {
 
     # modifications
     # count for lines which contains both additions ({+...+}) and deletions ([-...-]) provided by `word-diff` option
-    vModifications=$(git show --word-diff $vCommit -- $vFile | grep "{+.*+}" | grep "\[-.*-\]" | wc -l)
+    vModifications=$(git show --word-diff-regex=. $vCommit -- $vFile | grep "{+.*+}" | grep "\[-.*-\]" | wc -l)
     vNewCode=$(($vAdditions - $vModifications))
     vDeletions=$(($vDeletions - $vModifications))
 
